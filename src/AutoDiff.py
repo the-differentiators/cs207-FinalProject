@@ -41,17 +41,16 @@ class Ad_Var():
 
     def __truediv__(self, other):
         try:
-            num = (self._ders * other._val) - (self._val * other._ders)
-            denom = other._val ** 2
-            return Ad_Var(self._val / other._val, num / denom)
+            return Ad_Var(self._val / other._val, ((self._ders * other._val) - (self._val * other._ders)) / (other._val ** 2))
         except AttributeError:
             return Ad_Var(self._val / other, self._ders / other)
 
     def __rtruediv__(self, other):
-        return self.__div__(other)
-
-    def __abs__(self):
-        pass
+        # Uncertain about this.
+        try:
+            return Ad_Var(other._val / self._val, -1 / (self._ders) ** 2)
+        except AttributeError:
+            return Ad_Var(other / self._val , other / self._ders)
 
     def __pow__(self, r):
         if not (isinstance(r, float) or isinstance(r, int)):
