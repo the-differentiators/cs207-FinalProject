@@ -39,11 +39,16 @@ class Ad_Var():
     def __rmul__(self, other):
         return self.__mul__(other)
 
-    def __div__(self, other):
-        pass
+    def __truediv__(self, other):
+        try:
+            num = (self._ders * other._val) - (self._val * other._ders)
+            denom = other._val ** 2
+            return Ad_Var(self._val / other._val, num / denom)
+        except AttributeError:
+            return Ad_Var(self._val / other, self._ders / other)
 
-    def __rdiv__(self, other):
-        pass
+    def __rtruediv__(self, other):
+        return self.__div__(other)
 
     def __abs__(self):
         pass
@@ -57,25 +62,25 @@ class Ad_Var():
         return Ad_Var(np.exp(self._val), np.exp(self._val) * self._ders)
 
     def log(self, logbase=np.e):
-        pass
+        return Ad_Var(np.log(self._val) / np.log(logbase), 1 / (self._ders * np.log(logbase)))
 
     def sin(self):
-        pass
+        return Ad_Var(np.sin(self._val), np.cos(self._ders))
 
     def cos(self):
-        pass
+        return Ad_Var(np.cos(self._val), -np.sin(self._ders))
 
     def tan(self):
-        pass
+        return Ad_Var(np.tan(self._val), 1 / np.cos(self._ders) ** 2)
 
     def arcsin(self):
-        pass
+        return Ad_Var(np.arcsin(self._val), 1 / np.sqrt(1 - (self._ders ** 2)))
 
     def arccos(self):
-        pass
+        return Ad_Var(np.arccos(self._val), -1 / np.sqrt(1 - (self._ders ** 2)))
 
     def arctan(self):
-        pass
+        return Ad_Var(np.arctan(self._vals), 1 / (1 + self._ders ** 2))
 
     @staticmethod
     def get_jacobian(functions_array, functions_dim, vars_dim):
@@ -120,4 +125,3 @@ if __name__ == "__main__":
     print(Ad_Var.get_jacobian(f, 5, 3))
     print("values of vector function")
     print(Ad_Var.get_values(f))
-
