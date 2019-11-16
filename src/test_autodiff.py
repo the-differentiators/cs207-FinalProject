@@ -80,11 +80,11 @@ def test_multiple():
     y = Ad_Var(2, np.array([0, 1, 0]))
     z = Ad_Var(3, np.array([0, 0, 1]))
     f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/z), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
-    print(Ad_Var.get_values(f))
     #assert (Ad_Var.get_values(f) == [2.161209223472559, 2.5, 3.475053966765925, 0.48234790710102493]).all()
     #assert (Ad_Var.get_jacobian(f, 4, 3) == [[-3.365883939231586, 0.5403023058681398, 0],[-1.5, -0.75,1],[3.465204141695363,0,-0.15506804723178771],[0, 0.22656190261729092,0]]).all()
     assert (Ad_Var.get_values(f) == [np.cos(1)*4, 1 + 3**2/6 ,3*np.log(2) + np.exp(1/3), np.arctan(np.arcsin(1/2))]).all()
-    assert (Ad_Var.get_jacobian(f, 4, 3) == [[-3.365883939231586, 0.5403023058681398, 0],[-1.5, -0.75,1],[3.465204141695363,0,-0.15506804723178771],[0, 0.22656190261729092,0]]).all()
+    assert (Ad_Var.get_jacobian(f, 4, 3) == [[-4*np.sin(1), np.cos(1), 0],[-1.5, -0.75,1],[3+np.exp(1/3)/3,0,-np.exp(1/3)/9],[0, 1/(4*(np.sqrt(3/4))*(np.arcsin(1/2)**2 + 1)),0]]).all()
+
 if __name__ == "__main__":
     test_exp()
     test_log()
