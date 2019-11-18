@@ -6,9 +6,9 @@ Created on Fri Nov 15 21:24:08 2019
 @author: Ivywang
 """
 
-import pytest
+
 import numpy as np
-from AutoDiff import Ad_Var
+from src.AutoDiff import Ad_Var
 
 def test_exp():
     ## scaler
@@ -139,6 +139,8 @@ def test_eq():
     y = Ad_Var(1, [1,0])
     print(x)
     assert x == y
+
+
     
 def test_func():
     x = Ad_Var(1, np.array([1, 0, 0]))
