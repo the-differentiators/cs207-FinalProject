@@ -102,7 +102,7 @@ class Ad_Var():
                 raise TypeError("The list of functions inputted is not a numpy array of Ad_Var objects.")
             values.append(function.get_val())
         return np.array(values)
-
+'''
 if __name__ == "__main__":
     x = Ad_Var(2, np.array([1, 0]))
     y = Ad_Var(3, np.array([0, 1]))
@@ -124,4 +124,4 @@ if __name__ == "__main__":
     print("jacobian example 2")
     print(Ad_Var.get_jacobian(f, 5, 3))
     print("values of vector function")
-    print(Ad_Var.get_values(f))
+    print(Ad_Var.get_values(f))'''
