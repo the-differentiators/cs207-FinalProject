@@ -8,6 +8,9 @@ Created on Fri Nov 15 21:24:08 2019
 
 
 import numpy as np
+import sys
+sys.path.append('../')
+
 from src.AutoDiff import Ad_Var
 
 def test_exp():
@@ -94,6 +97,27 @@ def test_pow():
     except TypeError:
         print("Type Error sucessfully catched - pow")
     
+def test_sub1():
+    x1 = Ad_Var(1, np.array([1, 0]))
+    x2 = Ad_Var(2, np.array([0, 1]))
+    f = x2 - x1
+    assert f.get_val() == 1
+    assert (f.get_ders() == [-1, 1]).all()
+
+def test_sub2():
+    x1 = Ad_Var(1)
+    x2 = 2
+    f = x2 - x1
+    assert f.get_val() == 1
+    assert f.get_ders() == 1
+
+def test_sub3():
+    x1 = Ad_Var(1,np.array([1,0]))
+    x2 = 2
+    f = x2 - x1
+    assert f.get_val() == 1
+    assert (f.get_ders() == [1, 0]).all()
+
 def test_div1():
     x1 = Ad_Var(1, np.array([1, 0]))
     x2 = Ad_Var(2, np.array([0, 1]))
@@ -135,13 +159,29 @@ def test_eq():
     b = Ad_Var(1, -1)
     print(a)
     assert a == b
-    x = Ad_Var(1, [1,0])
-    y = Ad_Var(1, [1,0])
+    x = Ad_Var(1, np.array([1,0]))
+    y = Ad_Var(1, np.array([1,0]))
     print(x)
-    assert x == y
+    assert (x == y).all()
 
-
-    
+def test_input():
+    try:
+        a = Ad_Var('s',2)
+    except TypeError:
+        print("TypeError sucessfully catched - value1")
+    try:
+        b = Ad_Var([2,3,4],2)
+    except TypeError:
+        print("TypeError sucessfully catched - value2")
+    try:
+        c = Ad_Var(2,'s')
+    except TypeError:
+        print("TypeError sucessfully catched - der1")
+    try:
+        d = Ad_Var(2,np.array([1,2,'dog']))
+    except TypeError:
+        print("TypeError sucessfully catched - der2")
+        
 def test_func():
     x = Ad_Var(1, np.array([1, 0, 0]))
     y = Ad_Var(2, np.array([0, 1, 0]))
@@ -162,17 +202,20 @@ def test_func():
     except ValueError:
         print("ValueError sucessfully catched - get_jacobian")
  
-if __name__ == "__main__":
-    test_exp()
-    test_log()
-    test_trig()
-    test_inverse_trig()
-    test_pow()
-    test_div1()
-    test_div2()
-    test_mul1()
-    test_mul2()
-    test_multiple()
-    test_eq()
-    test_func()
-    print("All tests passed!")
+
+test_exp()
+test_log()
+test_trig()
+test_inverse_trig()
+test_pow()
+test_sub1()
+test_sub2()
+test_div1()
+test_div2()
+test_mul1()
+test_mul2()
+test_multiple()
+test_eq()
+test_func()
+test_input()
+print("All tests passed!")
