@@ -8,7 +8,10 @@ Created on Fri Nov 15 21:24:08 2019
 
 
 import numpy as np
-from AutoDiff import Ad_Var
+import sys
+sys.path.append('../')
+
+from src.AutoDiff import Ad_Var
 
 def test_exp():
     ## scaler
