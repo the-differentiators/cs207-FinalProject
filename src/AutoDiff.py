@@ -137,35 +137,3 @@ class Ad_Var():
                 raise TypeError("The list of functions inputted is not a numpy array of Ad_Var objects.")
             values.append(function.get_val())
         return np.array(values)
-
-
-if __name__ == '__main__':
-    def test_pow():
-        ## scalar
-        a = Ad_Var(1, -3)
-        b = a ** 2
-        assert b.get_val() == 1
-        assert b.get_ders() == -6
-        ## gradient
-        x1 = Ad_Var(1, np.array([1, 0]))
-        x2 = Ad_Var(2, np.array([0, 1]))
-        f = x1 ** 2 + x2 ** (-3)
-        assert f.get_val() == 1.125
-        assert (f.get_ders() == [2, -3 / 16]).all()
-        a = Ad_Var(2)
-        f = a ** (a**2)
-        assert f.get_val() == 16
-        assert f.get_ders() == 16*(4*np.log(2) + 4/2)
-        f = 5 ** a
-        assert f.get_val() == 25
-        assert f.get_ders() == np.log(5) * 25
-        f = Ad_Var.sqrt(a)
-        assert f.get_val() == np.sqrt(2)
-        assert f.get_ders() == 0.5 * 2**(-0.5)
-        try:
-            a = Ad_Var(1, 3)
-            b = a ** 's'
-        except TypeError:
-            print("Type Error sucessfully catched - pow")
-
-    test_pow()
