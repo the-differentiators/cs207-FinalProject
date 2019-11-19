@@ -78,10 +78,20 @@ class Ad_Var():
         '''except AttributeError:
             return Ad_Var(other / self._val , - other / (self._ders)**2)'''
 
-    def __pow__(self, r):
-        if not (isinstance(r, float) or isinstance(r, int)):
-            raise TypeError("Exponent must be of numeric type.")
-        return Ad_Var(self._val ** r, r * self._val ** (r - 1) * self._ders)
+    def __pow__(self, other):
+        try:
+            return Ad_Var(self._val ** other._val, self._val ** other._val * (other._ders * np.log(self._val) + other._val * self._ders/self._val))
+        except AttributeError:
+            return Ad_Var(self._val ** other, other * self._val ** (other - 1) * self._ders)
+
+    def __rpow__(self, other):
+        if isinstance(other, numbers.Number):
+            return Ad_Var(other ** self._val, np.log(other) * (other ** self._val) * self._ders)
+        else:
+            raise TypeError("Base should be an instance of numeric type/")
+
+    def sqrt(self):
+        return self ** 0.5
 
     def exp(self):
         return Ad_Var(np.exp(self._val), np.exp(self._val) * self._ders)
@@ -127,3 +137,35 @@ class Ad_Var():
                 raise TypeError("The list of functions inputted is not a numpy array of Ad_Var objects.")
             values.append(function.get_val())
         return np.array(values)
+
+
+if __name__ == '__main__':
+    def test_pow():
+        ## scalar
+        a = Ad_Var(1, -3)
+        b = a ** 2
+        assert b.get_val() == 1
+        assert b.get_ders() == -6
+        ## gradient
+        x1 = Ad_Var(1, np.array([1, 0]))
+        x2 = Ad_Var(2, np.array([0, 1]))
+        f = x1 ** 2 + x2 ** (-3)
+        assert f.get_val() == 1.125
+        assert (f.get_ders() == [2, -3 / 16]).all()
+        a = Ad_Var(2)
+        f = a ** (a**2)
+        assert f.get_val() == 16
+        assert f.get_ders() == 16*(4*np.log(2) + 4/2)
+        f = 5 ** a
+        assert f.get_val() == 25
+        assert f.get_ders() == np.log(5) * 25
+        f = Ad_Var.sqrt(a)
+        assert f.get_val() == np.sqrt(2)
+        assert f.get_ders() == 0.5 * 2**(-0.5)
+        try:
+            a = Ad_Var(1, 3)
+            b = a ** 's'
+        except TypeError:
+            print("Type Error sucessfully catched - pow")
+
+    test_pow()
