@@ -87,9 +87,17 @@ def test_pow():
     assert b.get_ders() == -6
     ## scalar (rpow)
     c = Ad_Var(2)
+    try:
+        d_exception = 'not a number' ** c
+    except TypeError:
+        print("Type error successfully caught - rpow")
     d = 2 ** c
     assert d.get_val() == 4
     assert d.get_ders() == np.log(2) * 4
+    ## sqrt
+    e = Ad_Var(4)
+    assert e.sqrt().get_val() == 2.0
+    assert e.sqrt().get_ders() == 0.25
     ## gradient
     x1 = Ad_Var(1, np.array([1, 0]))
     x2 = Ad_Var(2, np.array([0, 1]))
@@ -122,6 +130,13 @@ def test_sub3():
     f = x2 - x1
     assert f.get_val() == 1
     assert (f.get_ders() == [1, 0]).all()
+
+def test_sub4():
+    x1 = Ad_Var(5)
+    x2 = 3
+    f = x1 - x2
+    assert f.get_val() == 2
+    assert f.get_ders() == 1
 
 def test_div1():
     x1 = Ad_Var(1, np.array([1, 0]))
@@ -215,6 +230,7 @@ test_inverse_trig()
 test_pow()
 test_sub1()
 test_sub2()
+test_sub4()
 test_div1()
 test_div2()
 test_mul1()
