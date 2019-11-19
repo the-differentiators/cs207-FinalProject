@@ -8,12 +8,8 @@ Created on Fri Nov 15 21:24:08 2019
 
 
 import numpy as np
-#from src.AutoDiff import Ad_Var
-import os
-path = os.getcwd().replace('test','src')
-os.chdir(path)
-
 from AutoDiff import Ad_Var
+
 def test_exp():
     ## scaler
     a = Ad_Var(1,-3)
