@@ -207,13 +207,13 @@ def test_func():
     y = Ad_Var(2, np.array([0, 1, 0]))
     z = 's'
     try:
-        f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/z), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
-        Ad_Var.get_values(f)
+        f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/y), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
+        Ad_Var.get_values(f, z)
     except TypeError:
         print("TypeError sucessfully catched - get_values")
     try:
-        f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/z), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
-        Ad_Var.get_jacobian(f)
+        f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/y), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
+        Ad_Var.get_jacobian(f, z)
     except TypeError:
         print("TypeError sucessfully catched - get_jacobian")
     try:
