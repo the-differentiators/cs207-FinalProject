@@ -109,7 +109,7 @@ def test_sub2():
     assert f.get_ders() == 1
 
 def test_sub3():
-    x1 = Ad_Var(1,[1,0])
+    x1 = Ad_Var(1,np.array([1,0]))
     x2 = 2
     f = x2 - x1
     assert f.get_val() == 1
