@@ -9,9 +9,9 @@ Created on Fri Nov 15 21:24:08 2019
 
 import numpy as np
 import sys
-sys.path.append('../src')
+sys.path.append('../')
 
-from AutoDiff import Ad_Var
+from src.AutoDiff import Ad_Var
 
 def test_exp():
     ## scaler
