@@ -60,7 +60,7 @@ def test_trig():
     assert (f.get_ders() == [np.cos(np.pi/4), -np.sin(np.pi/4), 1/np.cos(np.pi/4)**2]).all()
 
 def test_inverse_trig():
-    ## scaler
+    ## scalar
     a = Ad_Var(0.1,-3)
     b = Ad_Var.arcsin(a)
     c = Ad_Var.arccos(a)
@@ -85,6 +85,11 @@ def test_pow():
     b = a**2
     assert b.get_val() == 1
     assert b.get_ders() == -6
+    ## scalar (rpow)
+    c = Ad_Var(2)
+    d = 2 ** c
+    assert d.get_val() == 4
+    assert d.get_ders() == np.log(2) * 4
     ## gradient
     x1 = Ad_Var(1, np.array([1, 0]))
     x2 = Ad_Var(2, np.array([0, 1]))

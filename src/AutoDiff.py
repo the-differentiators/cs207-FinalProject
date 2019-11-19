@@ -88,7 +88,7 @@ class Ad_Var():
         if isinstance(other, numbers.Number):
             return Ad_Var(other ** self._val, np.log(other) * (other ** self._val) * self._ders)
         else:
-            raise TypeError("Base should be an instance of numeric type/")
+            raise TypeError("Base should be an instance of numeric type.")
 
     def sqrt(self):
         return self ** 0.5
