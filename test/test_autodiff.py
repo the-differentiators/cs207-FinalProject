@@ -11,7 +11,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from src.AutoDiff import Ad_Var
+from AutoDiff import Ad_Var
 
 def test_exp():
     ## scaler
@@ -109,6 +109,13 @@ def test_pow():
         b = a**'s'
     except TypeError:
         print("Type Error sucessfully catched - pow")
+    ## gradient (rpow)
+    f2 = 2 ** x1 + 2 ** x2
+    print(f2)
+    print([2 * np.log(2), 4 * np.log(2)])
+    assert f2.get_val() == 6.0
+    assert (f.get_ders() == [2., -3/16]).all()
+    
     
 def test_sub1():
     x1 = Ad_Var(1, np.array([1, 0]))
@@ -207,33 +214,20 @@ def test_func():
     y = Ad_Var(2, np.array([0, 1, 0]))
     z = 's'
     try:
-        f = np.array([Ad_Var.cos(x)*(y+2), 1 + y**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/y), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
-        Ad_Var.get_values(f, z)
+        f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/z), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
+        Ad_Var.get_values(f)
     except TypeError:
-        print("TypeError sucessfully catched - get_values1")
-
+        print("TypeError sucessfully catched - get_values")
     try:
-        Ad_Var.get_values([3,2,1])
+        f = np.array([Ad_Var.cos(x)*(y+2), 1 + z**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/z), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
+        Ad_Var.get_jacobian(f)
     except TypeError:
-        print("TypeError sucessfully catched - get_values2")
-
-    try:
-        f = np.array([Ad_Var.cos(x)*(y+2), 1 + y**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/y), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
-        Ad_Var.get_jacobian(f, z)
-    except TypeError:
-        print("TypeError sucessfully catched - get_jacobian1")
-
-    try:
-        f = np.array([Ad_Var.cos(x)*(y+2), 1 + y**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/y), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
-        Ad_Var.get_jacobian([1,2,3], 3, 2)
-    except TypeError:
-        print("TypeError sucessfully catched - get_jacobian2")
-
+        print("TypeError sucessfully catched - get_jacobian")
     try:
         f = np.array([Ad_Var.cos(x)*(y+2), 1 + x**2/(x*y*3), 3*Ad_Var.log(x*2) + Ad_Var.exp(x/y), Ad_Var.arctan(Ad_Var.arcsin(y/4))])
         Ad_Var.get_jacobian(f,5,4)
     except ValueError:
-        print("ValueError sucessfully catched - get_jacobian3")
+        print("ValueError sucessfully catched - get_jacobian")
  
 
 test_exp()
