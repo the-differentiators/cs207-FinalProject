@@ -78,10 +78,20 @@ class Ad_Var():
         '''except AttributeError:
             return Ad_Var(other / self._val , - other / (self._ders)**2)'''
 
-    def __pow__(self, r):
-        if not (isinstance(r, float) or isinstance(r, int)):
-            raise TypeError("Exponent must be of numeric type.")
-        return Ad_Var(self._val ** r, r * self._val ** (r - 1) * self._ders)
+    def __pow__(self, other):
+        try:
+            return Ad_Var(self._val ** other._val, self._val ** other._val * (other._ders * np.log(self._val) + other._val * self._ders/self._val))
+        except AttributeError:
+            return Ad_Var(self._val ** other, other * self._val ** (other - 1) * self._ders)
+
+    def __rpow__(self, other):
+        if isinstance(other, numbers.Number):
+            return Ad_Var(other ** self._val, np.log(other) * (other ** self._val) * self._ders)
+        else:
+            raise TypeError("Base should be an instance of numeric type.")
+
+    def sqrt(self):
+        return self ** 0.5
 
     def exp(self):
         return Ad_Var(np.exp(self._val), np.exp(self._val) * self._ders)

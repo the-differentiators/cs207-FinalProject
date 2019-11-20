@@ -60,7 +60,7 @@ def test_trig():
     assert (f.get_ders() == [np.cos(np.pi/4), -np.sin(np.pi/4), 1/np.cos(np.pi/4)**2]).all()
 
 def test_inverse_trig():
-    ## scaler
+    ## scalar
     a = Ad_Var(0.1,-3)
     b = Ad_Var.arcsin(a)
     c = Ad_Var.arccos(a)
@@ -85,6 +85,19 @@ def test_pow():
     b = a**2
     assert b.get_val() == 1
     assert b.get_ders() == -6
+    ## scalar (rpow)
+    c = Ad_Var(2)
+    try:
+        d_exception = 'not a number' ** c
+    except TypeError:
+        print("Type error successfully caught - rpow")
+    d = 2 ** c
+    assert d.get_val() == 4
+    assert d.get_ders() == np.log(2) * 4
+    ## sqrt
+    e = Ad_Var(4)
+    assert e.sqrt().get_val() == 2.0
+    assert e.sqrt().get_ders() == 0.25
     ## gradient
     x1 = Ad_Var(1, np.array([1, 0]))
     x2 = Ad_Var(2, np.array([0, 1]))
@@ -96,6 +109,13 @@ def test_pow():
         b = a**'s'
     except TypeError:
         print("Type Error sucessfully catched - pow")
+    ## gradient (rpow)
+    f2 = 2 ** x1 + 2 ** x2
+    print(f2)
+    print([2 * np.log(2), 4 * np.log(2)])
+    assert f2.get_val() == 6.0
+    assert (f.get_ders() == [2., -3/16]).all()
+    
     
 def test_sub1():
     x1 = Ad_Var(1, np.array([1, 0]))
@@ -117,6 +137,13 @@ def test_sub3():
     f = x2 - x1
     assert f.get_val() == 1
     assert (f.get_ders() == [1, 0]).all()
+
+def test_sub4():
+    x1 = Ad_Var(5)
+    x2 = 3
+    f = x1 - x2
+    assert f.get_val() == 2
+    assert f.get_ders() == 1
 
 def test_div1():
     x1 = Ad_Var(1, np.array([1, 0]))
@@ -210,6 +237,7 @@ test_inverse_trig()
 test_pow()
 test_sub1()
 test_sub2()
+test_sub4()
 test_div1()
 test_div2()
 test_mul1()
