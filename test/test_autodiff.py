@@ -11,7 +11,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from AutoDiff import Ad_Var
+from src.AutoDiff import Ad_Var
 
 def test_exp():
     ## scaler
