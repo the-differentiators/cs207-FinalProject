@@ -2,7 +2,7 @@ import numpy as np
 import numbers as numbers
 
 class Ad_Var():
-    def __init__(self, val, ders=1):
+    def __init__(self, val=1, ders=1):
         if isinstance(val, numbers.Number):
             if isinstance(ders, numbers.Number):
                 pass
@@ -18,8 +18,18 @@ class Ad_Var():
         self._val = val
         self._ders = ders
 
+
+    def get_val(self):
+        return self._val
+
+    def get_ders(self):
+        return self._ders
+
     def __eq__(self, other):
         return self._val == other._val and self._ders == other._ders
+
+    def __ne__(self, other):
+        return self._val != other._val or self._ders != other._ders
 
     def __repr__(self):
         if type(self.get_ders()).__name__ == 'ndarray' and len(self.get_ders()) > 1:
@@ -28,12 +38,9 @@ class Ad_Var():
             print_stm = f'Value = {self._val}\nDerivative = {self._ders}'
         return print_stm
 
-    def get_val(self):
-        return self._val
-
-    def get_ders(self):
-        return self._ders
-
+    def __neg__(self):
+        pass
+    
     def __add__(self, other):
         try:
             return Ad_Var(self._val + other._val, self._ders + other._ders)
@@ -117,6 +124,20 @@ class Ad_Var():
     def arctan(self):
         return Ad_Var(np.arctan(self._val), self._ders / (1 + self._val ** 2))
 
+    def logistic(self):
+        pass
+
+    def sinh(self):
+        pass
+
+    def cosh(self):
+        pass
+
+    def tanh(self):
+        pass
+
+
+
     @staticmethod
     def get_jacobian(functions_array, functions_dim, vars_dim):
         #input is a numpy array of Ad_Var function
@@ -137,3 +158,9 @@ class Ad_Var():
                 raise TypeError("The list of functions inputted is not a numpy array of Ad_Var objects.")
             values.append(function.get_val())
         return np.array(values)
+
+    @staticmethod
+    def grid_eval(f, grid):
+        pass
+
+
