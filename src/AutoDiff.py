@@ -4,6 +4,20 @@ from itertools import product
 
 class Ad_Var():
     def __init__(self, val=1, ders=1):
+        """
+        Initialization of the Ad_Var class, the default value of the Ad_Var instance is 1, and the default
+        derivative of the Ad_Var instance is 1
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        val: variable value
+        ders: variable derivative
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3,2) #initializes an Ad_Var instance with value 3, and derivative 2
+        """
         if isinstance(val, numbers.Number):
             if isinstance(ders, numbers.Number):
                 pass
@@ -20,24 +34,150 @@ class Ad_Var():
         self._ders = ders
 
     def set_val(self, value):
+        """
+        Sets the value for the Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        value: variable value to be set
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> x.set_val(4)
+        >>> x.get_val()
+        4
+        """
         self._val = value
 
     def set_ders(self, derivatives):
+        """
+        Sets the derivative for the Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        derivatives: variable derivative to be set
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> x.set_ders(4)
+        >>> x.get_ders()
+        4
+        """
         self._ders = derivatives
 
     def get_val(self):
+        """
+        Returns the value for the Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        
+        Returns
+        =======
+        value for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> x.get_val()
+        3
+        """
         return self._val
 
     def get_ders(self):
+        """
+        Returns the derivative for the Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        
+        Returns
+        =======
+        derivative for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> x.get_ders()
+        1
+        """
         return self._ders
 
     def __eq__(self, other):
+        """
+        Returns whether the two the Ad_Var instances passed have the same values and derivatives.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var
+        
+        Returns
+        =======
+        equality check for two Ad_Var instances
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> y = Ad_Var(3,1)
+        >>> z = Ad_Var(4,1)
+        >>> x == y
+        True
+        >>> x == z
+        False
+        """
         return self._val == other._val and self._ders == other._ders
 
     def __ne__(self, other):
+        """
+        Returns whether the two the Ad_Var instances passed do not have the same values and derivatives.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var
+        
+        Returns
+        =======
+        inequality check for two Ad_Var instances
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> y = Ad_Var(3,1)
+        >>> z = Ad_Var(4,1)
+        >>> x != y
+        False
+        >>> x != z
+        True
+        """
         return self._val != other._val or self._ders != other._ders
 
     def __repr__(self):
+        """
+        Returns the object representation for the Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        
+        Returns
+        =======
+        object representation for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> print(x)
+        Value = 3
+        Derivative = 1
+        """
         if type(self.get_ders()).__name__ == 'ndarray' and len(self.get_ders()) > 1:
             print_stm = f'Value = {self._val}\nGradient = {self._ders}'
         else:
@@ -45,40 +185,211 @@ class Ad_Var():
         return print_stm
 
     def __neg__(self):
-        pass
+        """
+        Returns the negation for the Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        
+        Returns
+        =======
+        negation for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(3)
+        >>> -x
+        Value = -3
+        Derivative = -1
+        """
+        return Ad_Var(-self._val, -self._ders)
 
     def __add__(self, other):
+        """
+        Returns the addition for one Ad_Var instance and another Ad_Var or numeric type instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var/numeric type
+        
+        Returns
+        =======
+        addition for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(1,2)
+        >>> y = Ad_Var(1)
+        >>> f = x + y
+        >>> f.get_val()
+        2
+        >>> f.get_ders()
+        3
+        """
         try:
             return Ad_Var(self._val + other._val, self._ders + other._ders)
         except AttributeError:
             return Ad_Var(self._val + other, self._ders)
 
     def __radd__(self, other):
+        """
+        Returns the addition for one Ad_Var or numeric type instance and an Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var/numeric type
+        other: Ad_Var
+        
+        Returns
+        =======
+        addition for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = 1
+        >>> y = Ad_Var(2)
+        >>> f = x + y
+        >>> f.get_val()
+        2
+        >>> f.get_ders()
+        1
+        """
         return self.__add__(other)
     
     def __sub__(self, other):
+        """
+        Returns the subtraction for one Ad_Var instance and another Ad_Var or numeric type instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var/numeric type
+        
+        Returns
+        =======
+        subtraction for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(1,2)
+        >>> y = Ad_Var(1)
+        >>> f = x - y
+        >>> f.get_val()
+        0
+        >>> f.get_ders()
+        1
+        """
         try:
             return Ad_Var(self._val - other._val, self._ders - other._ders)
         except AttributeError:
             return Ad_Var(self._val - other, self._ders)
 
     def __rsub__(self, other):
+        """
+        Returns the subtraction for one Ad_Var or numeric type instance and another Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var/numeric type
+        other: Ad_Var
+        
+        Returns
+        =======
+        subtraction for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = 1
+        >>> y = Ad_Var(1)
+        >>> f = x - y
+        >>> f.get_val()
+        0
+        >>> f.get_ders()
+        -1
+        """
         try:
             return Ad_Var(other._val - self._val, other._ders - self._ders)
         except AttributeError:
-            return Ad_Var(other - self._val, self._ders)
+            return Ad_Var(other - self._val, - self._ders) #self._ders
     
 
     def __mul__(self, other):
+        """
+        Returns the multiplication for one Ad_Var instance and another Ad_Var or numeric type instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var/numeric type
+        
+        Returns
+        =======
+        multiplication for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(1,2)
+        >>> y = Ad_Var(2)
+        >>> f = x * y
+        >>> f.get_val()
+        2
+        >>> f.get_ders()
+        5
+        """
         try:
             return Ad_Var(self._val * other._val, self._ders * other._val + self._val * other._ders)
         except AttributeError:
             return Ad_Var(other * self._val, other * self._ders)
 
     def __rmul__(self, other):
+        """
+        Returns the multiplication for one Ad_Var or numeric type instance and another Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var/numeric type
+        other: Ad_Var
+        
+        Returns
+        =======
+        multiplication for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = 2
+        >>> y = Ad_Var(2)
+        >>> f = x * y
+        >>> f.get_val()
+        4
+        >>> f.get_ders()
+        2
+        """
         return self.__mul__(other)
 
     def __truediv__(self, other):
+        """
+        Returns the division for one Ad_Var instance and another Ad_Var or numeric type instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var/numeric type
+        
+        Returns
+        =======
+        division for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(1,2)
+        >>> y = Ad_Var(2,1)
+        >>> f = x / y
+        >>> f.get_val()
+        0.5
+        >>> f.get_ders()
+        0.75
+        """
         try: # Ad_Var(3)/Ad_Var(4)
             return Ad_Var(self._val / other._val, ((self._ders * other._val) - (self._val * other._ders)) / (other._val ** 2))
         except AttributeError: # Ad_Var(3)/4
@@ -86,18 +397,84 @@ class Ad_Var():
             return Ad_Var(self._val / other._val, ((self._ders * other._val) - (self._val * other._ders)) / (other._val ** 2))
 
     def __rtruediv__(self, other):
+        """
+        Returns the division for one Ad_Var or numeric type instance and another Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var/numeric type
+        other: Ad_Var
+        
+        Returns
+        =======
+        division for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = 1
+        >>> y = Ad_Var(2,1)
+        >>> f = x / y
+        >>> f.get_val()
+        0.5
+        >>> f.get_ders()
+        -0.25
+        """
         # 3/Ad_Var(4)
         return Ad_Var(other / self._val, - self._ders*other / (self._val) ** 2)
         '''except AttributeError:
             return Ad_Var(other / self._val , - other / (self._ders)**2)'''
 
     def __pow__(self, other):
+        """
+        Returns the power for one Ad_Var instance to the another Ad_Var or numeric type instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var/numeric type
+        
+        Returns
+        =======
+        power for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = Ad_Var(1,2)
+        >>> y = Ad_Var(2,1)
+        >>> f = x ** y
+        >>> f.get_val()
+        1
+        >>> f.get_ders()
+        4
+        """
         try:
             return Ad_Var(self._val ** other._val, self._val ** other._val * (other._ders * np.log(self._val) + other._val * self._ders/self._val))
         except AttributeError:
             return Ad_Var(self._val ** other, other * self._val ** (other - 1) * self._ders)
 
     def __rpow__(self, other):
+        """
+        Returns the power for one Ad_Var or numeric type instance to another Ad_Var instance passed.
+        
+        Parameters
+        ==========
+        self: Ad_Var/numeric type
+        other: Ad_Var
+        
+        Returns
+        =======
+        power for the Ad_Var instance
+        
+        Examples
+        =========
+        >>> x = 2
+        >>> y = Ad_Var(2,1)
+        >>> f = x ** y
+        >>> f.get_val()
+        4
+        >>> f.get_ders()
+        2.772588722239781
+        """
         if isinstance(other, numbers.Number):
             return Ad_Var(other ** self._val, np.log(other) * (other ** self._val) * self._ders)
         else:
@@ -333,13 +710,67 @@ class Ad_Var():
         return Ad_Var(sigmoid(self._val), sigmoid_derivative(self._val) * self._ders)
 
     def sinh(self):
-        pass
+        """
+        Returns the hyperbolic sine of the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+
+        Returns
+        =======
+        Ad_Var object which is the hyperbolic sine of the object passed
+        Examples
+        =========
+        >>> x1 = Ad_Var(np.pi/4)
+        >>> f = Ad_Var.sinh(x1)
+        >>> f.get_val()
+        0.8686709614860095
+        >>> f.get_ders()
+        1.3246090892520057
+        """
+        return Ad_Var(np.sinh(self._val), self._ders*np.cosh(self._val)) 
 
     def cosh(self):
-        pass
+        """
+        Returns the hyperbolic cosine of the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+
+        Returns
+        =======
+        Ad_Var object which is the hyperbolic cosine of the object passed
+        Examples
+        =========
+        >>> x1 = Ad_Var(np.pi/4)
+        >>> f = Ad_Var.cosh(x1)
+        >>> f.get_val()
+        1.3246090892520057
+        >>> f.get_ders()
+        0.8686709614860095
+        """
+        return Ad_Var(np.cosh(self._val), self._ders*np.sinh(self._val)) 
 
     def tanh(self):
-        pass
+        """
+        Returns the hyperbolic tangent of the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+
+        Returns
+        =======
+        Ad_Var object which is the hyperbolic tangent of the object passed
+        Examples
+        =========
+        >>> x1 = Ad_Var(np.pi/4)
+        >>> f = Ad_Var.tanh(x1)
+        >>> f.get_val()
+        0.6557942026326724
+        >>> f.get_ders()
+        0.24541076067097178
+        """
+        return Ad_Var(np.tanh(self._val), self._ders*(1 - np.sinh(self._val)**2))
 
 
 
