@@ -139,7 +139,7 @@ def test_sub3():
     x2 = 2
     f = x2 - x1
     assert f.get_val() == 1
-    assert (f.get_ders() == [1, 0]).all()
+    assert (f.get_ders() == [-1, 0]).all()
 
 def test_sub4():
     x1 = Ad_Var(5)
@@ -318,6 +318,7 @@ test_inverse_trig()
 test_pow()
 test_sub1()
 test_sub2()
+test_sub3()
 test_sub4()
 test_div1()
 test_div2()
