@@ -9,9 +9,12 @@ Created on Fri Nov 15 21:24:08 2019
 
 import numpy as np
 import sys
+import numbers as numbers
+from itertools import product
 sys.path.append('../')
 
 from src.AutoDiff import Ad_Var
+
 
 def test_exp():
     ## scaler
@@ -129,7 +132,7 @@ def test_sub2():
     x2 = 2
     f = x2 - x1
     assert f.get_val() == 1
-    assert f.get_ders() == 1
+    assert f.get_ders() == -1
 
 def test_sub3():
     x1 = Ad_Var(1,np.array([1,0]))
@@ -242,7 +245,71 @@ def test_func():
         Ad_Var.get_jacobian(f,5,4)
     except ValueError:
         print("ValueError sucessfully catched - get_jacobian3")
- 
+
+def test_grid_eval():
+    #scalar function - one variable
+    x = Ad_Var()
+    f_str = "x**2 + 2*x"
+    dict = Ad_Var.grid_eval(f_str, ['x'], [x], [[2, 5]])
+    assert dict[(2,)] == (8, 6)
+    assert dict[(5,)] == (35, 12)
+
+    #scalar function - two variables
+    x = Ad_Var(ders = np.array([1, 0]))
+    y = Ad_Var(ders = np.array([0, 1]))
+    f_str = "x**2 * 3*y"
+    dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    #assert first point of the grid
+    assert dict[(1,2)][0] == 6 #assert value
+    assert (dict[(1,2)][1] ==  [12, 3]).all() #assert gradient
+    #assert second point of grid
+    assert dict[(1,3)][0] == 9
+    assert (dict[(1, 3)][1] == [18, 3]).all()
+
+    #vector function - two functions of two variables
+    f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+    dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    assert (dict[(1,2)][0] == np.array([6, np.exp(1)])).all() #assert the value of the vector valued function
+    assert (dict[(1,2)][1] == np.array([[12, 3], [np.exp(1), 0]])).all() #assert the jacobian
+    assert (dict[(1,3)][0] == np.array([9, np.exp(1)])).all()  # assert the value of the vector valued function
+    assert (dict[(1,3)][1] == np.array([[18, 3], [np.exp(1), 0]])).all()  # assert the jacobian
+
+    try:
+        f_str = "[x**2 * 3*y, ad.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    except NameError:
+        print("NameError successfully catched - ad is not the scope of grid_eval, Ad_Var should be used in func_string.")
+
+    try:
+        f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[2, 3]])
+    except ValueError:
+        print("ValueError successfully catched - a list of values for each variable should be passed to create the grid.")
+
+    try:
+        f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x'], [x, y], [[2, 3]])
+    except ValueError:
+        print("ValueError successfully catched - list of strings should have equal length to list of Ad_Var objects.")
+
+    try:
+        f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'a'], [x, y], [[2, 3]])
+    except NameError:
+        print("NameError successfully catched - test_grid_eval")
+
+    try:
+        f_str = "import os"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[2, 3]])
+    except ValueError:
+        print("ValueError successfully catched - test_grid_eval")
+
+    try:
+        f_str = "a*5 + x*y"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[2, 3]])
+    except NameError:
+        print("NameError successfully catched - function string contains a which is not in the variables passed.")
+
 
 test_exp()
 test_log()
@@ -260,4 +327,5 @@ test_multiple()
 test_eq()
 test_func()
 test_input()
+test_grid_eval()
 print("All tests passed!")

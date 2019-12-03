@@ -864,17 +864,19 @@ class Ad_Var():
         return np.array(values)
 
     @staticmethod
-    def grid_eval(func_string, variables_list, grid):
+    def grid_eval(func_string, vars_strings, Ad_Vars_list, grid):
         """
         Returns a dictionary with the function value and the corresponding derivative/gradient/jacobian
         evaluated at different points.
 
         INPUTS
         =======
-        func_String: string
+        func_string: string
             if function is scalar: a string which is a function of already defined Ad_Var objects , e.g. "x + 2y"
             if function is vector-valued: a string which is a list of functions of Ad_Var objects, e.g. "[x+2y, x**y, Ad_Var.cos(x)]"
-        variables_list: list of Ad_Var objects
+        vars_strings: list of strings
+            a list of the string representations of each variable used in the func_string, used to create a custom scope using only the variables references in func_string
+        Ad_Vars_list: list of Ad_Var objects
             a list of variables which are used in the function referenced in func_string
         grid: list of lists of points
             List of lists. The length of the outer list is equal to the the number of variables
@@ -894,28 +896,32 @@ class Ad_Var():
         =====
         PRE:
              - the string passed should be referencing already instantiated Ad_Var objects
-             - Any elementary functions used in the string should be preceded with Ad_Var, e.g. "Ad_Var.cos(x) + Ad_Var.exp(y)"
+             - the length of list with the string representations of variables should be equal to length of the list with the instantiated Ad_Var objects
+             - Any elementary functions used in the string should be preceded with Ad_Var precisely, e.g. "Ad_Var.cos(x) + Ad_Var.exp(y)"
              - if the user wants to evaluate the jacobian on multiple points, the string should be a list of functions which
                reference already instantiated Ad_Var objects, e.g. "[x+2y, x**y, Ad_Var.cos(x)]"
              - The length of the variables_list should be equal to the length of the grid
         POST:
              - raises a ValueError if the func_string uses containts import statements
+             - raises a ValueError if the length of list with the string representations of variables
+               is not equal to length of the list with the instantiated Ad_Var objects
              - raises a ValueError if the length of the variables_list is not equal to the length of the grid. A list of values should
                be passed for each variable referenced in the function defined by the func_string.
+
 
         EXAMPLES
         =========
         >>> x = Ad_Var(1, np.array([1, 0]))
         >>> y = Ad_Var(2, np.array([0, 1]))
         >>> f_string = "[Ad_Var.cos(x) * (y + 2), 1 + x ** 2 / (x * y * 3), 3 * Ad_Var.log(x * 2) + Ad_Var.exp(x / y)]"
-        >>> Ad_Var.grid_eval(f_string, [x, y], [[1,2],[2,3]])
+        >>> Ad_Var.grid_eval(f_string, ['x', 'y'], [x, y], [[1,2],[2,3]])
         {(1, 2): (array([2.16120922, 3.72816281]), array([[-3.36588394,  0.54030231], [ 3.82436064, -0.41218032]])),
         (1, 3): (array([2.70151153, 3.47505397]), array([[-4.20735492,  0.54030231], [ 3.46520414, -0.15506805]])),
         (2, 2): (array([-1.66458735,  6.87716491]), array([[-3.63718971, -0.41614684], [ 2.85914091, -1.35914091]])),
         (2, 3): (array([-2.08073418,  6.10661712]), array([[-4.54648713, -0.41614684], [ 2.14924468, -0.43282979]]))}
         >>> a = Ad_Var(1, 1)
         >>> f_string = "a**3"
-        >>> Ad_Var.grid_eval(f_string, [a], [[1,2,3]])
+        >>> Ad_Var.grid_eval(f_string, ['a'], [a], [[1,2,3]])
         {(1,): (1, 3), (2,): (8, 12), (3,): (27, 27)}
         """
 
@@ -923,13 +929,19 @@ class Ad_Var():
         if "import" in func_string:
             raise ValueError("Function string can only be a sequence of operations on Ad_Var variables.")
 
-        f = eval(func_string)
+        if len(vars_strings) != len(Ad_Vars_list):
+            raise ValueError("Lengths of vars_strings and Ad_Vars_list should be equal.")
+
+        #restrict the scope to variables used in the function
+        scope = dict(zip(vars_strings, Ad_Vars_list))
+        scope['Ad_Var'] = Ad_Var
+        f = eval(func_string, scope)
 
         #make the list a numpy array
         if (func_string.startswith('[')) and (func_string.endswith(']')):
             f = np.array(f)
 
-        if len(variables_list) != len(grid):
+        if len(Ad_Vars_list) != len(grid):
             raise ValueError("Grid dimensions do not match with the number of variables used in function.")
 
         grid_points = list(product(*grid))
@@ -938,18 +950,18 @@ class Ad_Var():
         #if f is scalar function
         if type(f).__name__ == 'Ad_Var':
             for tuple in grid_points:
-                for i, variable in enumerate(variables_list):
+                for i, variable in enumerate(Ad_Vars_list):
                     variable.set_val(tuple[i])
-                f = eval(func_string)
+                f = eval(func_string, scope)
                 result_dict[tuple] = (f.get_val(), f.get_ders())
 
         #if f is a vector function
         else:
             for tuple in grid_points:
-                for i, variable in enumerate(variables_list):
+                for i, variable in enumerate(Ad_Vars_list):
                     variable.set_val(tuple[i])
-                f = eval(func_string)
-                result_dict[tuple] = (Ad_Var.get_values(f), Ad_Var.get_jacobian(f, len(f), len(variables_list)))
+                f = eval(func_string, scope)
+                result_dict[tuple] = (Ad_Var.get_values(f), Ad_Var.get_jacobian(f, len(f), len(Ad_Vars_list)))
 
         return result_dict
 
@@ -957,6 +969,7 @@ class Ad_Var():
 
 
 if __name__=='__main__':
+    """
     x = Ad_Var(1, np.array([1, 0]))
     y = Ad_Var(2, np.array([0, 1]))
     f_string = "[Ad_Var.cos(x) * (y + 2), 3 * Ad_Var.log(x * 2) + Ad_Var.exp(x / y)]"
@@ -966,3 +979,9 @@ if __name__=='__main__':
     f_string = "a**3"
     dict1 = Ad_Var.grid_eval(f_string, [a], [[1,2,3]])
     print(dict1)
+    """
+    x = Ad_Var(ders = np.array([1, 0]))
+    y = Ad_Var(ders = np.array([0, 1]))
+    f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+    dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    print(dict)
