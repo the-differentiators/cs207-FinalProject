@@ -12,6 +12,12 @@ class rAd_Var():
     def __str__(self):
         return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()}'
 
+    def get_val(self):
+        return self._val
+
+    def get_ders(self):
+        return self._ders
+
     def __add__(self, other):
         try:
             rad_object = rAd_Var(self._val + other._val)
@@ -139,11 +145,11 @@ class rAd_Var():
         rad_object.parents = [self]
         return rad_object
 
-x = rAd_Var(1)
-y = rAd_Var(2)
+# x = rAd_Var(1)
+# y = rAd_Var(2)
 
-x1 = x * y
-x2 = x1.exp()
+# x1 = x * y
+# x2 = x1.exp()
 
-f = x1 + x2
-print(f.runreverse()) 
+# f = x1 + x2
+# print(f.runreverse()) 
