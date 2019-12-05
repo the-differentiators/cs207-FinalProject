@@ -181,7 +181,7 @@ class Ad_Var():
 
     def __repr__(self):
         """
-        Returns the object representation for the Ad_Var instance passed.
+        Returns Returns a string representing the value of `self._val` (Value) and the value of `self._ders` (Gradient)
 
         Parameters
         ==========
@@ -455,7 +455,7 @@ class Ad_Var():
 
         Returns
         =======
-        power for the Ad_Var instance
+        power for the Ad_Var instance, self ** other
 
         Examples
         =========
