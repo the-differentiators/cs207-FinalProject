@@ -56,8 +56,23 @@ def test_sub():
     print(ders)
     assert(x1.get_val() == 500)
     assert(ders == [1, -1, -1]).all()
- 
-test_exp()
-test_add()
-test_sub()
-print("All tests passed!")
+
+def test_jacobian():
+    x = Ad_Var(1)
+    y = Ad_Var(2)
+    f = np.array(["rAd_Var.cos(x) * (y + 2)", "1 + x ** 2 / (x * y * 3)", "3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)"])
+    print(Ad_Var.get_jacobian([x, y], f))
+
+test_jacobian()
+
+# test_exp()
+# test_add()
+# test_sub()
+# test_jacobian()
+# print("All tests passed!")
+
+# >> > f.outer()
+# >> > a.get_grad()
+# array([4., 4.])
+# >> > b.get_grad()
+# array([29.66253179, 88.98759538])
