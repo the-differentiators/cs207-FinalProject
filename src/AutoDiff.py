@@ -7,13 +7,13 @@ class Ad_Var():
         """
         Initialization of the Ad_Var class, the default value of the Ad_Var instance is 1, and the default
         derivative of the Ad_Var instance is 1
-        
+
         Parameters
         ==========
         self: Ad_Var
         val: variable value
         ders: variable derivative
-        
+
         Examples
         =========
         >>> x = Ad_Var(3,2) #initializes an Ad_Var instance with value 3, and derivative 2
@@ -36,12 +36,12 @@ class Ad_Var():
     def set_val(self, value):
         """
         Sets the value for the Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         value: variable value to be set
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -54,12 +54,12 @@ class Ad_Var():
     def set_ders(self, derivatives):
         """
         Sets the derivative for the Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         derivatives: variable derivative to be set
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -72,15 +72,15 @@ class Ad_Var():
     def get_val(self):
         """
         Returns the value for the Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
-        
+
         Returns
         =======
         value for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -92,15 +92,15 @@ class Ad_Var():
     def get_ders(self):
         """
         Returns the derivative for the Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
-        
+
         Returns
         =======
         derivative for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -111,17 +111,17 @@ class Ad_Var():
 
     def __eq__(self, other):
         """
-        Returns whether the two the Ad_Var instances passed have the same values and derivatives.
-        
+        Returns whether the two Ad_Var instances passed have the same values and derivatives.
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var
-        
+
         Returns
         =======
         equality check for two Ad_Var instances
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -132,21 +132,30 @@ class Ad_Var():
         >>> x == z
         False
         """
-        return self._val == other._val and self._ders == other._ders
+        if np.isscalar(self._ders):
+            if np.isscalar(other._ders):
+                return self._val == other._val and self._ders == other._ders
+            else:
+                raise TypeError('Can not compare a scaler Ad_Var and a vector Ad_Var')
+        else:
+            if np.isscalar(other._ders):
+                raise TypeError('Can not compare a scaler Ad_Var and a vector Ad_Var')
+            else:
+                return (self._val == other._val) and (self._ders == other._ders).all()
 
     def __ne__(self, other):
         """
-        Returns whether the two the Ad_Var instances passed do not have the same values and derivatives.
-        
+        Returns whether the two Ad_Var instances passed do not have the same values and derivatives.
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var
-        
+
         Returns
         =======
         inequality check for two Ad_Var instances
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -157,20 +166,31 @@ class Ad_Var():
         >>> x != z
         True
         """
-        return self._val != other._val or self._ders != other._ders
+        if np.isscalar(self._ders):
+            if np.isscalar(other._ders):
+                return self._val != other._val or self._ders != other._ders
+            else:
+                raise TypeError('Can not compare a scaler Ad_Var and a vector Ad_Var')
+        else:
+            if np.isscalar(other._ders):
+                raise TypeError('Can not compare a scaler Ad_Var and a vector Ad_Var')
+            else:
+                return (self._val != other._val) or (self._ders != other._ders).any()
+
+
 
     def __repr__(self):
         """
         Returns the object representation for the Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
-        
+
         Returns
         =======
         object representation for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -187,15 +207,15 @@ class Ad_Var():
     def __neg__(self):
         """
         Returns the negation for the Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
-        
+
         Returns
         =======
         negation for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(3)
@@ -208,16 +228,16 @@ class Ad_Var():
     def __add__(self, other):
         """
         Returns the addition for one Ad_Var instance and another Ad_Var or numeric type instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var/numeric type
-        
+
         Returns
         =======
         addition for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(1,2)
@@ -240,11 +260,11 @@ class Ad_Var():
         ==========
         self: Ad_Var/numeric type
         other: Ad_Var
-        
+
         Returns
         =======
         addition for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = 1
@@ -256,20 +276,20 @@ class Ad_Var():
         1
         """
         return self.__add__(other)
-    
+
     def __sub__(self, other):
         """
         Returns the subtraction for one Ad_Var instance and another Ad_Var or numeric type instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var/numeric type
-        
+
         Returns
         =======
         subtraction for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(1,2)
@@ -288,16 +308,16 @@ class Ad_Var():
     def __rsub__(self, other):
         """
         Returns the subtraction for one Ad_Var or numeric type instance and another Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var/numeric type
         other: Ad_Var
-        
+
         Returns
         =======
         subtraction for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = 1
@@ -312,21 +332,21 @@ class Ad_Var():
             return Ad_Var(other._val - self._val, other._ders - self._ders)
         except AttributeError:
             return Ad_Var(other - self._val, - self._ders) #self._ders
-    
+
 
     def __mul__(self, other):
         """
         Returns the multiplication for one Ad_Var instance and another Ad_Var or numeric type instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var/numeric type
-        
+
         Returns
         =======
         multiplication for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(1,2)
@@ -345,16 +365,16 @@ class Ad_Var():
     def __rmul__(self, other):
         """
         Returns the multiplication for one Ad_Var or numeric type instance and another Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var/numeric type
         other: Ad_Var
-        
+
         Returns
         =======
         multiplication for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = 2
@@ -370,16 +390,16 @@ class Ad_Var():
     def __truediv__(self, other):
         """
         Returns the division for one Ad_Var instance and another Ad_Var or numeric type instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var/numeric type
-        
+
         Returns
         =======
         division for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(1,2)
@@ -399,16 +419,16 @@ class Ad_Var():
     def __rtruediv__(self, other):
         """
         Returns the division for one Ad_Var or numeric type instance and another Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var/numeric type
         other: Ad_Var
-        
+
         Returns
         =======
         division for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = 1
@@ -427,16 +447,16 @@ class Ad_Var():
     def __pow__(self, other):
         """
         Returns the power for one Ad_Var instance to the another Ad_Var or numeric type instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var
         other: Ad_Var/numeric type
-        
+
         Returns
         =======
         power for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = Ad_Var(1,2)
@@ -455,16 +475,16 @@ class Ad_Var():
     def __rpow__(self, other):
         """
         Returns the power for one Ad_Var or numeric type instance to another Ad_Var instance passed.
-        
+
         Parameters
         ==========
         self: Ad_Var/numeric type
         other: Ad_Var
-        
+
         Returns
         =======
         power for the Ad_Var instance
-        
+
         Examples
         =========
         >>> x = 2
@@ -546,7 +566,7 @@ class Ad_Var():
         >>> f.get_ders()
         [0.125, 0.25]
         """
-        return Ad_Var(np.log(self._val) / np.log(logbase), self._ders / (self._val * np.log(logbase)))  
+        return Ad_Var(np.log(self._val) / np.log(logbase), self._ders / (self._val * np.log(logbase)))
 
     def sin(self):
         """
@@ -567,7 +587,7 @@ class Ad_Var():
         >>> f.get_ders()
         0.7071067811865475
         """
-        return Ad_Var(np.sin(self._val), self._ders*np.cos(self._val)) 
+        return Ad_Var(np.sin(self._val), self._ders*np.cos(self._val))
 
     def cos(self):
         """
@@ -588,7 +608,7 @@ class Ad_Var():
         >>> f.get_ders()
         -0.7071067811865475
         """
-        return Ad_Var(np.cos(self._val), -self._ders*np.sin(self._val)) 
+        return Ad_Var(np.cos(self._val), -self._ders*np.sin(self._val))
 
     def tan(self):
         """
@@ -609,7 +629,7 @@ class Ad_Var():
         >>> f.get_ders()
         1.0
         """
-        return Ad_Var(np.tan(self._val), self._ders / np.cos(self._val) ** 2) 
+        return Ad_Var(np.tan(self._val), self._ders / np.cos(self._val) ** 2)
 
     def arcsin(self):
         """
@@ -630,7 +650,11 @@ class Ad_Var():
         >>> f.get_ders()
         1.0
         """
-        return Ad_Var(np.arcsin(self._val), self._ders / np.sqrt(1 - (self._val ** 2))) 
+        if -1 <= self._val <= 1:
+            return Ad_Var(np.arcsin(self._val), self._ders / np.sqrt(1 - (self._val ** 2)))
+        else:
+            raise ValueError('The domain of the inverse trig function should be [-1,1]')
+
 
     def arccos(self):
         """
@@ -651,7 +675,10 @@ class Ad_Var():
         >>> f.get_ders()
         -1.0
         """
-        return Ad_Var(np.arccos(self._val), -self._ders / np.sqrt(1 - (self._val ** 2))) 
+        if -1 <= self._val <= 1:
+            return Ad_Var(np.arccos(self._val), -self._ders / np.sqrt(1 - (self._val ** 2)))
+        else:
+            raise ValueError('The domain of the inverse trig function should be [-1,1]')
 
     def arctan(self):
         """
@@ -672,7 +699,73 @@ class Ad_Var():
         >>> f.get_ders()
         1.0
         """
-        return Ad_Var(np.arctan(self._val), self._ders / (1 + self._val ** 2))
+        if -1 <= self._val <= 1:
+            return Ad_Var(np.arctan(self._val), self._ders / (1 + self._val ** 2))
+        else:
+            raise ValueError('The domain of the inverse trig function should be [-1,1]')
+
+    def sinh(self):
+        """
+        Returns the hyperbolic sine of the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+
+        Returns
+        =======
+        Ad_Var object which is the hyperbolic sine of the object passed
+        Examples
+        =========
+        >>> x1 = Ad_Var(np.pi/4)
+        >>> f = Ad_Var.sinh(x1)
+        >>> f.get_val()
+        0.8686709614860095
+        >>> f.get_ders()
+        1.3246090892520057
+        """
+        return Ad_Var(np.sinh(self._val), self._ders*np.cosh(self._val))
+
+    def cosh(self):
+        """
+        Returns the hyperbolic cosine of the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+
+        Returns
+        =======
+        Ad_Var object which is the hyperbolic cosine of the object passed
+        Examples
+        =========
+        >>> x1 = Ad_Var(np.pi/4)
+        >>> f = Ad_Var.cosh(x1)
+        >>> f.get_val()
+        1.3246090892520057
+        >>> f.get_ders()
+        0.8686709614860095
+        """
+        return Ad_Var(np.cosh(self._val), self._ders*np.sinh(self._val))
+
+    def tanh(self):
+        """
+        Returns the hyperbolic tangent of the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+
+        Returns
+        =======
+        Ad_Var object which is the hyperbolic tangent of the object passed
+        Examples
+        =========
+        >>> x1 = Ad_Var(np.pi/4)
+        >>> f = Ad_Var.tanh(x1)
+        >>> f.get_val()
+        0.6557942026326724
+        >>> f.get_ders()
+        0.24541076067097178
+        """
+        return Ad_Var(np.tanh(self._val), self._ders*(1 - np.tanh(self._val)**2))
 
     def logistic(self):
         """
@@ -708,70 +801,6 @@ class Ad_Var():
             return der
 
         return Ad_Var(sigmoid(self._val), sigmoid_derivative(self._val) * self._ders)
-
-    def sinh(self):
-        """
-        Returns the hyperbolic sine of the Ad_Var instance passed.
-        Parameters
-        ==========
-        self: Ad_Var
-
-        Returns
-        =======
-        Ad_Var object which is the hyperbolic sine of the object passed
-        Examples
-        =========
-        >>> x1 = Ad_Var(np.pi/4)
-        >>> f = Ad_Var.sinh(x1)
-        >>> f.get_val()
-        0.8686709614860095
-        >>> f.get_ders()
-        1.3246090892520057
-        """
-        return Ad_Var(np.sinh(self._val), self._ders*np.cosh(self._val)) 
-
-    def cosh(self):
-        """
-        Returns the hyperbolic cosine of the Ad_Var instance passed.
-        Parameters
-        ==========
-        self: Ad_Var
-
-        Returns
-        =======
-        Ad_Var object which is the hyperbolic cosine of the object passed
-        Examples
-        =========
-        >>> x1 = Ad_Var(np.pi/4)
-        >>> f = Ad_Var.cosh(x1)
-        >>> f.get_val()
-        1.3246090892520057
-        >>> f.get_ders()
-        0.8686709614860095
-        """
-        return Ad_Var(np.cosh(self._val), self._ders*np.sinh(self._val)) 
-
-    def tanh(self):
-        """
-        Returns the hyperbolic tangent of the Ad_Var instance passed.
-        Parameters
-        ==========
-        self: Ad_Var
-
-        Returns
-        =======
-        Ad_Var object which is the hyperbolic tangent of the object passed
-        Examples
-        =========
-        >>> x1 = Ad_Var(np.pi/4)
-        >>> f = Ad_Var.tanh(x1)
-        >>> f.get_val()
-        0.6557942026326724
-        >>> f.get_ders()
-        0.24541076067097178
-        """
-        return Ad_Var(np.tanh(self._val), self._ders*(1 - np.sinh(self._val)**2))
-
 
 
     @staticmethod
@@ -868,7 +897,6 @@ class Ad_Var():
         """
         Returns a dictionary with the function value and the corresponding derivative/gradient/jacobian
         evaluated at different points.
-
         INPUTS
         =======
         func_string: string
@@ -884,14 +912,12 @@ class Ad_Var():
             variables_list = [x, y, z]. If the grid = [[1,2], [3,4], [8]], then the user specifies
             that he wants to get the value and the gradient of the function at points (x,y,z) = (1,3,8),
             (1,4,8), (2,3,8), (2,4,8).
-
         RETURNS
         ========
         result_dict: dictionary
             Each key is a point on the grid passed and the value is a tuple with two elements. The first element of the tuple is
             the value of the function at this point, while the second element is the derivative (if function is scalar of one variable),
             gradient (if scalar function of multiple variables) or jacobian (if vector-valued function of multiple variables).
-
         NOTES
         =====
         PRE:
@@ -907,8 +933,6 @@ class Ad_Var():
                is not equal to length of the list with the instantiated Ad_Var objects
              - raises a ValueError if the length of the variables_list is not equal to the length of the grid. A list of values should
                be passed for each variable referenced in the function defined by the func_string.
-
-
         EXAMPLES
         =========
         >>> x = Ad_Var(1, np.array([1, 0]))
