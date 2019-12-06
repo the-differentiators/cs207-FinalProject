@@ -13,6 +13,13 @@ sys.path.append('../')
 
 from src.AutoDiff import Ad_Var
 
+def test_setters():
+    a = Ad_Var(1,-3)
+    a.set_val(2)
+    a.set_ders(2)
+    assert a.get_val() == 2
+    assert a.get_ders() == 2
+    
 def test_comparison():
     ## scaler
     a = Ad_Var(1,-3)
@@ -30,6 +37,18 @@ def test_comparison():
         a == x1
     except TypeError:
         print("TypeError successfully caught - comparison")
+    try:
+        x1 == a
+    except TypeError:
+        print("TypeError successfully caught - comparison") 
+    try:
+        a != x1
+    except TypeError:
+        print("TypeError successfully caught - comparison")
+    try:
+        x1 != a
+    except TypeError:
+        print("TypeError successfully caught - comparison") 
         
 def test_neg():
     ## scaler
@@ -389,7 +408,7 @@ def test_grid_eval():
     except NameError:
         print("NameError successfully catched - function string contains a which is not in the variables passed.")
 
-
+test_setters()
 test_comparison()
 test_neg()
 test_exp()
