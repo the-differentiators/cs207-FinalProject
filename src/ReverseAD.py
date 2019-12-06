@@ -3,11 +3,17 @@ import numbers as numbers
 
 class rAd_Var():
     def __init__(self, val, ders=None):
-        self._val = np.array([val]).reshape(-1,)
-        self._ders = ders
-        self.parents = []
-        self.children = []
-        self.seen = False # Set to True during runreverse() traversal, then reset at end
+        # Extract single element from array (Jacobian workaround)
+        if type(val) is np.ndarray and len(val) == 1:
+            val = val[0]
+        if isinstance(val, numbers.Number):
+            self._val = np.array([val]).reshape(-1,)
+            self._ders = ders
+            self.parents = []
+            self.children = []
+            self.seen = False # Set to True during runreverse() traversal, then reset at end
+        else:
+            raise TypeError("Value should be one instance of numeric type.")
 
     def __str__(self):
         return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()}'
@@ -116,7 +122,8 @@ class rAd_Var():
 
     def __neg__(self):
         rad_object = rAd_Var(self._val * -1)
-        self.children.append(rad_object, (np.array([-1.0]*len(self._val))))
+        self.children.append((rad_object, (np.array([-1.0]*len(self._val)))))
+        rad_object.parents = [self]
         return rad_object
 
     def sqrt(self):

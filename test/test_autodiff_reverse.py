@@ -144,14 +144,28 @@ def test_eq():
     c = Ad_Var(2)
     assert(a == b and a != c)
 
+def test_neg():
+    a = Ad_Var(5)
+    f = -a
+    ders = f.runreverse()
+    assert(f.get_val() == -5)
+    assert(ders == -1)
+
+def test_sqrt():
+    a = Ad_Var(16)
+    f = a.sqrt()
+    ders = f.runreverse()
+    assert(f.get_val() == 4)
+    assert(ders == 1/8)
+
 def test_input():
     try:
         print(Ad_Var('NaN'))
-    except:
+    except TypeError:
         print("Input test 1 passed.")
     try:
         print(Ad_Var(None))
-    except:
+    except TypeError:
         print("Input test 2 passed.")
 
 
@@ -170,6 +184,8 @@ test_mul()
 test_div()
 test_pow()
 test_eq()
+test_neg()
+test_sqrt()
 test_input()
 test_log()
 print("All tests passed!")
