@@ -154,7 +154,6 @@ def test_input():
     except:
         print("Input test 2 passed.")
 
-
 def test_jacobian():
 
     def f1(x, y):
@@ -167,6 +166,21 @@ def test_jacobian():
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
 
     np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], [1, 2]), [[-3.36588394, 0.54030231],[0.16666667, -0.08333333],[3.82436064, -0.41218032]])
+
+def test_get_val():
+
+    def f1(x, y):
+        return rAd_Var.cos(x) * (y + 2)
+
+    def f2(x, y):
+        return 1 + x ** 2 / (x * y * 3)
+
+    def f3(x, y):
+        return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
+
+    return rAd_Var.get_values([f1, f2, f3], [1, 2])
+
+    np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], [1, 2]), [2.16120922, 1.16666667, 3.72816281])
 
 test_exp()
 test_add()

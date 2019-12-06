@@ -3,6 +3,8 @@ import numbers as numbers
 
 class rAd_Var():
     def __init__(self, val, ders=None):
+        if not isinstance(val, numbers.Number):
+            raise TypeError("Value should be one instance of numeric type.")
         self._val = val
         self._ders = ders
         self.parents = []
@@ -10,12 +12,47 @@ class rAd_Var():
         self.seen = False # Set to True during runreverse() traversal, then reset at end
 
     def __str__(self):
-        return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()}'
+        return f'Reverse Autodiff Object with value {self._val} and gradient {self.get_ders()}'
+
+    def set_val(self, value):
+        """
+        Sets the value for the rAd_Var instance passed.
+        Parameters
+        ==========
+        self: rAd_Var
+        value: variable value to be set
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> x.set_val(4)
+        >>> x.get_val()
+        4
+        """
+        self._val = value
+
+    def set_ders(self, derivatives):
+        """
+        Sets the derivative for the rAd_Var instance passed.
+        Parameters
+        ==========
+        self: rAd_Var
+        derivatives: variable derivative to be set
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> x.set_ders(4)
+        >>> x.get_ders()
+        4
+        """
+        self._ders = derivatives
 
     def get_val(self):
         return self._val
 
     def get_ders(self):
+        if self._ders is None:
+            new_deriv = sum(weight * var.get_ders() for var, weight in self.children)
+            self.set_ders(new_deriv)
         return self._ders
 
     def __add__(self, other):
@@ -111,7 +148,7 @@ class rAd_Var():
             raise TypeError("Base should be an instance of numeric type.")
 
     def __eq__(self, other):
-        if self._val == other._val and self.gradient() == other.gradient():
+        if self._val == other._val and self.get_ders() == other.get_ders():
             return True
         else:
             return False
@@ -213,13 +250,6 @@ class rAd_Var():
         rad_object.parents = [self]
         return rad_object
 
-    def gradient(self):
-        if self._ders is None:
-            self._ders = 0
-            for var, weight in self.children:
-                self._ders += weight * var.gradient()
-        return self._ders
-
     def get_originals(self):
         # Walk through tree, finding nodes without parents
         ancestorlist = []
@@ -238,7 +268,7 @@ class rAd_Var():
         return ancestorlist
 
     def runreverse(self):
-        self._ders = 1.0
+        self.set_ders(1.0)
         originals = []
         seen_ids = []
         gradient_matrix = np.array([])
@@ -248,7 +278,7 @@ class rAd_Var():
                 seen_ids.append(id(ancestor))
 
         for original in originals:
-            gradient_matrix = np.append(gradient_matrix, original.gradient())
+            gradient_matrix = np.append(gradient_matrix, original.get_ders())
 
         return gradient_matrix
 
@@ -303,3 +333,44 @@ class rAd_Var():
             jacobian[i] = function(*variables).runreverse()
 
         return jacobian
+
+    @staticmethod
+    def get_values(functions_array, var_values):
+        """
+        Returns the values of for a vector-valued function evaluated at a point in higher dimensions.
+        INPUTS
+        =======
+        functions_array: numpy array of Python function
+            a vector of functions passed into the method
+        var_values: numpy array of numeric values
+           values for variables in the functions array
+        RETURNS
+        ========
+        values: a numpy array with shape (functions_dim,)
+            the vector with the values of the vector-valued function evaluated at a point
+        NOTES
+        =====
+        PRE:
+             - functions_array is a numpy array of only Ad_Var objects
+        POST:
+             - raises a TypeError exception if any of the elements of the functions_array are not of type Ad_Var
+        EXAMPLES
+        =========
+        >>> def f1(x, y):
+        ...  rAd_Var.cos(x) * (y + 2)
+        >>> def f2(x,y):
+        ...  return 1 + x ** 2 / (x * y * 3)
+        >>> def f3(x, y):
+        ...  return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
+        >>> rAd_Var.get_values([f1, f2, f3], [1, 2])
+        [2.16120922 1.16666667 3.72816281]
+        """
+        values = []
+        for function in functions_array:
+            variables = []
+            for value in var_values:
+                variables.append(rAd_Var(value))
+            if len(function.__code__.co_varnames) > len(variables):
+                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({len(var_values)}).")
+            values.append(function(*variables).get_val())
+        return np.array(values)
