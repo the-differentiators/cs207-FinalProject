@@ -25,9 +25,9 @@ def test_exp():
 
 def test_add():
     # Scalar
-    a = rAd_Var(99)
+    a, b = rAd_Var(99), rAd_Var(99)
     f = a + 1
-    g = 1 + a
+    g = 1 + b
     ders_f = f.runreverse()
     ders_g = g.runreverse()
     assert(ders_f == ders_g and f.get_val() == g.get_val())
@@ -64,7 +64,8 @@ def test_mul():
     a = rAd_Var(12)
     b = 3
     f = a * b
-    g = b * a
+    c = rAd_Var(12)
+    g = b * c
     ders_f = f.runreverse()
     ders_g = g.runreverse()
     assert(f.get_val() == g.get_val() == 36)
@@ -160,9 +161,8 @@ def test_sqrt():
 
 def test_trig():
     # Scalar
-    a = rAd_Var(np.pi/4)
-    b = rAd_Var.sin(a)
-    c = rAd_Var.cos(a)
+    b = rAd_Var.sin(rAd_Var(np.pi/4))
+    c = rAd_Var.cos(rAd_Var(np.pi/4))
     d = rAd_Var(np.pi)
     e = rAd_Var.tan(d)
     ders_b = b.runreverse()
@@ -171,7 +171,7 @@ def test_trig():
     assert(b.get_val() == np.sin(np.pi/4))
     np.testing.assert_almost_equal(ders_b, np.cos(np.pi/4))
     assert(c.get_val() == np.cos(np.pi/4))
-    np.testing.assert_almost_equal(ders_c, np.sin(np.pi/4))
+    np.testing.assert_almost_equal(ders_c, -np.sin(np.pi/4))
     assert(e.get_val() == np.tan(np.pi))
     np.testing.assert_almost_equal(ders_e, 1/np.cos(np.pi)**2)
     a1 = rAd_Var(np.pi)
@@ -255,7 +255,7 @@ def test_get_val():
     def f3(x, y):
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
 
-    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], [1, 2]), [[2.16120922], [1.16666667], [3.72816281]])
+    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], [1, 2]), np.array([2.161209, 1.166667, 3.728163]))
 
     return rAd_Var.get_values([f1, f2, f3], [1, 2])
 

@@ -20,7 +20,8 @@ class rAd_Var():
             self._val = val
 
         else:
-            self._val = np.array([val]).reshape(-1, )
+            raise TypeError()
+            # self._val = np.array([val]).reshape(-1, )
 
         self._ders = None
         self.parents = []
@@ -212,7 +213,7 @@ class rAd_Var():
 
     def __neg__(self):
         rad_object = rAd_Var(self._val * -1)
-        self.children.append((rad_object, (np.array([-1.0]*len(self._val)))))
+        self.children.append((rad_object, (np.array([-1.0]))))
         rad_object.parents = [self]
         return rad_object
 
