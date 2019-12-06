@@ -27,9 +27,12 @@ def test_add():
     # Scalar
     a = Ad_Var(99)
     f = a + 1
-    ders = f.runreverse()
+    g = 1 + a
+    ders_f = f.runreverse()
+    ders_g = g.runreverse()
+    assert(ders_f == ders_g and f.get_val() == g.get_val())
     assert(f.get_val() == 100)
-    assert(ders == [1])
+    assert(ders_f == [1])
     # Gradient
     x = Ad_Var(4)
     y = Ad_Var(8)
@@ -53,9 +56,74 @@ def test_sub():
     z = Ad_Var(-100)
     x1 = x - y - z
     ders = x1.runreverse()
-    print(ders)
     assert(x1.get_val() == 500)
     assert(ders == [1, -1, -1]).all()
+
+def test_mul():
+    # Scalar
+    a = Ad_Var(12)
+    b = 3
+    f = a * b
+    g = b * a
+    ders_f = f.runreverse()
+    ders_g = g.runreverse()
+    assert(f.get_val() == g.get_val() == 36)
+    assert(ders_f == ders_g) 
+    assert(ders_f == [3]).all()
+    # Gradient
+    x = Ad_Var(3)
+    y = Ad_Var(-2)
+    z = Ad_Var(3)
+    x1 = x * y * z
+    ders = x1.runreverse()
+    assert(x1.get_val() == -18)
+    assert(ders == [-6, 9, -6]).all()
+
+def test_div():
+    # Scalar
+    a = Ad_Var(20)
+    b = 2
+    f = a / b
+    # g = b / a
+    ders_f = f.runreverse()
+    # ders_g = g.runreverse()
+    assert(f.get_val() == 10)
+    # assert(g.get_val() == 0.5)
+    # Gradient
+    x = Ad_Var(10)
+    y = Ad_Var(5)
+    x1 = x / y
+    ders = x1.runreverse()
+    assert(x1.get_val() == 2)
+
+def test_pow():
+    # Scalar
+    a = Ad_Var(2)
+    b = 3
+    f = a ** b
+    ders = f.runreverse()
+    assert(f.get_val() == 8)
+    assert(ders == [12])
+    # Type test.
+    try:
+        f2 = a ** "NaN"
+    except:
+        print("test_pow type checking successful!")
+    # Rpow.
+    c = Ad_Var(4)
+    d = 3
+    g = d ** c
+    ders_g = g.runreverse()
+    assert(g.get_val() == 81)
+    assert(ders_g == [81*np.log(3)])
+    # Gradient
+    x = Ad_Var(2)
+    y = Ad_Var(2)
+    z = Ad_Var(2)
+    x1 = x ** y ** z
+    ders = x1.runreverse()
+    assert(x1.get_val() == 16)
+    assert(ders == [32, 64*np.log(2), 64*(np.log(2) ** 2)]).all()
 
 def test_jacobian():
     x = Ad_Var(1)
@@ -65,11 +133,13 @@ def test_jacobian():
 
 test_jacobian()
 
-# test_exp()
-# test_add()
-# test_sub()
-# test_jacobian()
-# print("All tests passed!")
+test_exp()
+test_add()
+test_sub()
+test_mul()
+test_div()
+test_pow()
+print("All tests passed!")
 
 # >> > f.outer()
 # >> > a.get_grad()

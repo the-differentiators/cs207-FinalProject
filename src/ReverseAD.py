@@ -10,7 +10,7 @@ class rAd_Var():
         self.seen = False # Set to True during runreverse() traversal, then reset at end
 
     def __str__(self):
-        return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()}'
+        return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()} and tag {self.debug_tag}'
 
     def get_val(self):
         return self._val
@@ -75,12 +75,13 @@ class rAd_Var():
             return rad_object
         except AttributeError:
             rad_object = rAd_Var(self._val / other)
-            self.children.append((1/other, rad_object))
+            self.children.append((rad_object, 1 / other))
             rad_object.parents = [self]
             return rad_object
 
     def __rtruediv__(self, other):
-        return other * self**(-1)
+        # TODO
+        pass
 
     def __pow__(self, other):
         try:
@@ -99,6 +100,7 @@ class rAd_Var():
         if isinstance(other, numbers.Number):
             rad_object = rAd_Var(other ** self._val)
             self.children.append((rad_object, other ** self._val * np.log(other)))
+            rad_object.parents = [self]
             return rad_object
         else:
             raise TypeError("Base should be an instance of numeric type.")
@@ -205,28 +207,30 @@ class rAd_Var():
     def get_originals(self):
         # Walk through tree, finding nodes without parents
         ancestorlist = []
+        seen = []
         if self.parents:
             for parent in self.parents:
                 # parent._ders = None
                 if not parent.seen:
                     ancestorlist.append(parent) 
                     ancestorlist += parent.get_originals()
-                    parent.seen = True
+                    # parent.seen = True
         
         # Reset all nodes in tree to unseen for future traversals
         for ancestor in ancestorlist:
             ancestor.seen = False
-            
+        
         return ancestorlist
 
     def runreverse(self):
         self._ders = 1.0
         originals = []
+        seen_ids = []
         gradient_matrix = np.array([])
-
         for ancestor in self.get_originals():
-            if not ancestor.parents and ancestor not in originals:
+            if not ancestor.parents and id(ancestor) not in seen_ids:
                 originals.append(ancestor)
+                seen_ids.append(id(ancestor))
 
         for original in originals:
             gradient_matrix = np.append(gradient_matrix, original.gradient())
@@ -290,12 +294,3 @@ class rAd_Var():
             ancestor.parents = []
             ancestor.children = []
 
-
-# x = rAd_Var(1)
-# y = rAd_Var(2)
-
-# x1 = x * y
-# x2 = x1.exp()
-
-# f = x1 + x2
-# print(f.runreverse()) 
