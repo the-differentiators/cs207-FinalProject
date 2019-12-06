@@ -145,14 +145,14 @@ def test_eq():
     assert(a == b and a != c)
 
 def test_neg():
-    a = Ad_Var(5)
+    a = rAd_Var(5)
     f = -a
     ders = f.runreverse()
     assert(f.get_val() == -5)
     assert(ders == -1)
 
 def test_sqrt():
-    a = Ad_Var(16)
+    a = rAd_Var(16)
     f = a.sqrt()
     ders = f.runreverse()
     assert(f.get_val() == 4)
@@ -160,11 +160,11 @@ def test_sqrt():
 
 def test_input():
     try:
-        print(Ad_Var('NaN'))
+        print(rAd_Var('NaN'))
     except TypeError:
         print("Input test 1 passed.")
     try:
-        print(Ad_Var(None))
+        print(rAd_Var(None))
     except TypeError:
         print("Input test 2 passed.")
 
