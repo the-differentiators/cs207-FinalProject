@@ -50,6 +50,13 @@ def test_sub():
     ders = f.runreverse()
     assert(f.get_val() == 100)
     assert(ders == [1])
+    # Rsub
+    c = rAd_Var(50)
+    d = 100
+    g = d - c
+    ders = g.runreverse()
+    assert(g.get_val() == 50)
+    assert(ders == -1)
     # Gradient
     x = rAd_Var(500)
     y = rAd_Var(100)
@@ -85,11 +92,14 @@ def test_div():
     a = rAd_Var(20)
     b = 2
     f = a / b
-    # g = b / a
+    c = rAd_Var(20)
+    g = b / c
     ders_f = f.runreverse()
-    # ders_g = g.runreverse()
+    ders_g = g.runreverse()
     assert(f.get_val() == 10)
-    # assert(g.get_val() == 0.5)
+    assert(g.get_val() == 0.1)
+    assert(ders_f == 1/2)
+    assert(ders_g == -1/200)
     # Gradient
     x = rAd_Var(10)
     y = rAd_Var(5)
@@ -211,6 +221,50 @@ def test_inverse_trig():
     assert f.get_val() == 1.7610626216439926
     assert (ders == [1.005037815259212, -1.0206207261596576, 0.9174311926605504]).all()
 
+def test_logistic():
+    def sigmoid(x):
+        return 1.0/(1 + np.exp(-x))
+
+    def sigmoid_derivative(x):
+        der = (1 - sigmoid(x)) * sigmoid(x)
+        return der
+
+    a = rAd_Var(1)
+    b = rAd_Var.logistic(a)
+    ders = b.runreverse()
+    assert b.get_val() == sigmoid(1)
+    np.testing.assert_almost_equal(ders, sigmoid_derivative(1))
+    x1 = rAd_Var(0.1)
+    x2 = rAd_Var(0.2)
+    f = rAd_Var.logistic(x1) - rAd_Var.logistic(x2)
+    ders = f.runreverse()
+    assert f.get_val() == sigmoid(0.1) - sigmoid(0.2)
+    np.testing.assert_array_almost_equal(ders, [sigmoid_derivative(0.1), -sigmoid_derivative(0.2)])
+
+def test_hyperbolic():
+    # Scalar
+    a1, a2, a3 = rAd_Var(0.1), rAd_Var(0.1), rAd_Var(0.1)
+    b = rAd_Var.sinh(a1)
+    c = rAd_Var.cosh(a2)
+    d = rAd_Var.tanh(a3)
+    ders_b = b.runreverse()
+    ders_c = c.runreverse()
+    ders_d = d.runreverse()
+    assert b.get_val() == np.sinh(0.1)
+    assert ders_b == np.cosh(0.1)
+    assert c.get_val() == np.cosh(0.1)
+    assert ders_c == np.sinh(0.1)
+    assert d.get_val() == np.tanh(0.1)
+    assert ders_d == (1 - np.tanh(0.1)**2)
+    # Gradient
+    x1 = rAd_Var(0.1)
+    x2 = rAd_Var(0.2)
+    x3 = rAd_Var(0.3)
+    f = rAd_Var.sinh(x1) + rAd_Var.cosh(x2) - rAd_Var.tanh(x3)
+    ders = f.runreverse()
+    assert f.get_val() == np.sinh(0.1) + np.cosh(0.2) - np.tanh(0.3)
+    np.testing.assert_array_almost_equal(ders, [np.cosh(0.1), np.sinh(0.2), -1+np.tanh(0.3)**2])
+
 def test_multi_parent():
     x = rAd_Var(1)
     y = rAd_Var(2)
@@ -272,6 +326,8 @@ test_trig()
 test_inverse_trig()
 test_input()
 test_log()
+test_logistic()
+test_hyperbolic()
 test_jacobian()
 test_get_val()
 test_multi_parent()
