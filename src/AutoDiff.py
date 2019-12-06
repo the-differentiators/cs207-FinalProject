@@ -271,7 +271,7 @@ class Ad_Var():
         >>> y = Ad_Var(2)
         >>> f = x + y
         >>> f.get_val()
-        2
+        3
         >>> f.get_ders()
         1
         """
@@ -465,7 +465,7 @@ class Ad_Var():
         >>> f.get_val()
         1
         >>> f.get_ders()
-        4
+        4.0
         """
         try:
             return Ad_Var(self._val ** other._val, self._val ** other._val * (other._ders * np.log(self._val) + other._val * self._ders/self._val))
@@ -540,7 +540,7 @@ class Ad_Var():
         >>> f.get_val()
         20.085536923187668
         >>> f.get_ders()
-        20.085536923187668
+        array([20.08553692, 20.08553692])
         """
         return Ad_Var(np.exp(self._val), np.exp(self._val) * self._ders)
 
@@ -564,7 +564,7 @@ class Ad_Var():
         >>> f.get_val()
         2.0794415416798357
         >>> f.get_ders()
-        [0.125, 0.25]
+        array([0.125, 0.25 ])
         """
         return Ad_Var(np.log(self._val) / np.log(logbase), self._ders / (self._val * np.log(logbase)))
 
@@ -585,7 +585,7 @@ class Ad_Var():
         >>> f.get_val()
         0.7071067811865475
         >>> f.get_ders()
-        0.7071067811865475
+        0.7071067811865476
         """
         return Ad_Var(np.sin(self._val), self._ders*np.cos(self._val))
 
@@ -604,7 +604,7 @@ class Ad_Var():
         >>> x1 = Ad_Var(np.pi/4)
         >>> f = Ad_Var.cos(x1)
         >>> f.get_val()
-        0.7071067811865475
+        0.7071067811865476
         >>> f.get_ders()
         -0.7071067811865475
         """
@@ -695,7 +695,7 @@ class Ad_Var():
         >>> x1 = Ad_Var(0)
         >>> f = Ad_Var.arctan(x1)
         >>> f.get_val()
-        0
+        0.0
         >>> f.get_ders()
         1.0
         """
@@ -763,7 +763,7 @@ class Ad_Var():
         >>> f.get_val()
         0.6557942026326724
         >>> f.get_ders()
-        0.24541076067097178
+        0.5699339637933774
         """
         return Ad_Var(np.tanh(self._val), self._ders*(1 - np.tanh(self._val)**2))
 
@@ -791,7 +791,7 @@ class Ad_Var():
         >>> f.get_val()
         0.11920292202211755
         >>> f.get_ders()
-        [ 0.10499359 -0.20998717]
+        array([ 0.20998717, -0.10499359])
         """
         def sigmoid(x):
             return 1.0/(1 + np.exp(-x))
@@ -840,9 +840,9 @@ class Ad_Var():
         >>> y = Ad_Var(2, np.array([0, 1]))
         >>> f = np.array([Ad_Var.cos(x) * (y + 2), 1 + x ** 2 / (x * y * 3), 3 * Ad_Var.log(x * 2) + Ad_Var.exp(x / y)])
         >>> Ad_Var.get_jacobian(f, 3, 2)
-        [[-3.36588394  0.54030231]
-        [ 0.16666667 -0.08333333]
-        [ 3.82436064 -0.41218032]]
+        array([[-3.36588394,  0.54030231],
+               [ 0.16666667, -0.08333333],
+               [ 3.82436064, -0.41218032]])
         """
         #input is a numpy array of Ad_Var function
         jacobian = np.zeros((functions_dim, vars_dim))
@@ -883,7 +883,7 @@ class Ad_Var():
         >>> y = Ad_Var(2, np.array([0, 1]))
         >>> f = np.array([Ad_Var.cos(x) * (y + 2), 1 + x ** 2 / (x * y * 3), 3 * Ad_Var.log(x * 2) + Ad_Var.exp(x / y)])
         >>> Ad_Var.get_values(f)
-        [2.16120922 1.16666667 3.72816281]
+        array([2.16120922, 1.16666667, 3.72816281])
         """
         values = []
         for function in functions_array:
@@ -939,10 +939,15 @@ class Ad_Var():
         >>> y = Ad_Var(2, np.array([0, 1]))
         >>> f_string = "[Ad_Var.cos(x) * (y + 2), 1 + x ** 2 / (x * y * 3), 3 * Ad_Var.log(x * 2) + Ad_Var.exp(x / y)]"
         >>> Ad_Var.grid_eval(f_string, ['x', 'y'], [x, y], [[1,2],[2,3]])
-        {(1, 2): (array([2.16120922, 3.72816281]), array([[-3.36588394,  0.54030231], [ 3.82436064, -0.41218032]])),
-        (1, 3): (array([2.70151153, 3.47505397]), array([[-4.20735492,  0.54030231], [ 3.46520414, -0.15506805]])),
-        (2, 2): (array([-1.66458735,  6.87716491]), array([[-3.63718971, -0.41614684], [ 2.85914091, -1.35914091]])),
-        (2, 3): (array([-2.08073418,  6.10661712]), array([[-4.54648713, -0.41614684], [ 2.14924468, -0.43282979]]))}
+        {(1, 2): (array([2.16120922, 1.16666667, 3.72816281]), array([[-3.36588394,  0.54030231],
+               [ 0.16666667, -0.08333333],
+               [ 3.82436064, -0.41218032]])), (1, 3): (array([2.70151153, 1.11111111, 3.47505397]), array([[-4.20735492,  0.54030231],
+               [ 0.11111111, -0.03703704],
+               [ 3.46520414, -0.15506805]])), (2, 2): (array([-1.66458735,  1.33333333,  6.87716491]), array([[-3.63718971, -0.41614684],
+               [ 0.16666667, -0.16666667],
+               [ 2.85914091, -1.35914091]])), (2, 3): (array([-2.08073418,  1.22222222,  6.10661712]), array([[-4.54648713, -0.41614684],
+               [ 0.11111111, -0.07407407],
+               [ 2.14924468, -0.43282979]]))}
         >>> a = Ad_Var(1, 1)
         >>> f_string = "a**3"
         >>> Ad_Var.grid_eval(f_string, ['a'], [a], [[1,2,3]])
@@ -991,21 +996,6 @@ class Ad_Var():
 
 
 
-
 if __name__=='__main__':
-    """
-    x = Ad_Var(1, np.array([1, 0]))
-    y = Ad_Var(2, np.array([0, 1]))
-    f_string = "[Ad_Var.cos(x) * (y + 2), 3 * Ad_Var.log(x * 2) + Ad_Var.exp(x / y)]"
-    dict = Ad_Var.grid_eval(f_string, [x, y], [[1,2],[2,3]])
-    print(dict)
-    a = Ad_Var(1, 1)
-    f_string = "a**3"
-    dict1 = Ad_Var.grid_eval(f_string, [a], [[1,2,3]])
-    print(dict1)
-    """
-    x = Ad_Var(ders = np.array([1, 0]))
-    y = Ad_Var(ders = np.array([0, 1]))
-    f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
-    dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
-    print(dict)
+    import doctest
+    doctest.testmod(verbose=False)
