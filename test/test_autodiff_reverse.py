@@ -255,7 +255,7 @@ def test_get_val():
     def f3(x, y):
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
 
-    np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], [1, 2]), [2.16120922, 1.16666667, 3.72816281])
+    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], [1, 2]), [[2.16120922], [1.16666667], [3.72816281]])
 
     return rAd_Var.get_values([f1, f2, f3], [1, 2])
 
@@ -273,5 +273,6 @@ test_inverse_trig()
 test_input()
 test_log()
 test_jacobian()
+test_get_val()
 test_multi_parent()
 print("All tests passed!")
