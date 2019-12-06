@@ -3,20 +3,67 @@ import numbers as numbers
 
 class rAd_Var():
     def __init__(self, val):
-        # Extract single element from array (Jacobian workaround)
+        """
+        Initialization of the rAd_Var class, with only the value of the variable passed in as an argument
+        Parameters
+        ==========
+        self: Ad_Var
+        val: variable value
+        Examples
+        =========
+        >>> x = rAd_Var(3) #initializes an Ad_Var instance with value 3
+        """
         if type(val) is np.ndarray and len(val) == 1:
-            val = val[0]
-        if isinstance(val, numbers.Number):
-            self._val = np.array([val]).reshape(-1,)
-            self._ders = None
-            self.parents = []
-            self.children = []
-            self.seen = False # Set to True during runreverse() traversal, then reset at end
+            self._val = val[0]
+
+        elif isinstance(val, numbers.Number):
+            self._val = val
+
         else:
-            raise TypeError("Value should be one instance of numeric type.")
+            self._val = np.array([val]).reshape(-1, )
+
+        self._ders = None
+        self.parents = []
+        self.children = []
+        self.seen = False # Set to True during runreverse() traversal, then reset at end
 
     def __str__(self):
-        return f'Reverse Autodiff Object with value {self._val} and gradient {self.get_ders()}'
+        """
+        Returns Returns a string representing the value of `self._val` (Value) and the value of `self._ders` (Gradient)
+        Parameters
+        ==========
+        self: rAd_Var
+        Returns
+        =======
+        object representation for the Ad_Var instance
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> print(x)
+        Value = 3
+        Derivative = 1
+        """
+        print_stm = f'Value = {self._val}\nDerivative = {self.get_ders()}'
+        return print_stm
+
+    def __repr__(self):
+        """
+        Returns Returns a string representing the value of `self._val` (Value) and the value of `self._ders` (Gradient)
+        Parameters
+        ==========
+        self: rAd_Var
+        Returns
+        =======
+        object representation for the Ad_Var instance
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> print(x)
+        Value = 3
+        Derivative = 1
+        """
+        print_stm = f'Value = {self._val}\nDerivative = {self.get_ders()}'
+        return print_stm
 
     def set_val(self, value):
         """
@@ -55,8 +102,11 @@ class rAd_Var():
 
     def get_ders(self):
         if self._ders is None:
-            new_deriv = sum(weight * var.get_ders() for var, weight in self.children)
-            self.set_ders(new_deriv)
+            if not self.children:
+                self._ders = 1
+            else:
+                new_deriv = sum(weight * var.get_ders() for var, weight in self.children)
+                self.set_ders(new_deriv)
         return self._ders
 
     def __add__(self, other):
@@ -307,15 +357,15 @@ class rAd_Var():
         EXAMPLES
         =========
         >>> def f1(x, y):
-        ...  rAd_Var.cos(x) * (y + 2)
+        ...  return x * y
         >>> def f2(x,y):
-        ...  return 1 + x ** 2 / (x * y * 3)
+        ...  return x + y
         >>> def f3(x, y):
-        ...  return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
-        >>> rAd_Var.get_jacobian([f1, f2, f3], [1, 2]
-        [[-3.36588394  0.54030231]
-        [ 0.16666667 -0.08333333]
-        [ 3.82436064 -0.41218032]]
+        ...  return rAd_Var.log(x ** y)
+        >>> rAd_Var.get_jacobian([f1, f2, f3], [1, 2])
+        array([[2., 1.],
+               [1., 1.],
+               [2., 0.]])
         """
 
         #input is a numpy array of Ad_Var function
@@ -356,13 +406,13 @@ class rAd_Var():
         EXAMPLES
         =========
         >>> def f1(x, y):
-        ...  rAd_Var.cos(x) * (y + 2)
+        ...  return x * y
         >>> def f2(x,y):
-        ...  return 1 + x ** 2 / (x * y * 3)
+        ...  return x + y
         >>> def f3(x, y):
-        ...  return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
+        ...  return rAd_Var.log(x ** y)
         >>> rAd_Var.get_values([f1, f2, f3], [1, 2])
-        [2.16120922 1.16666667 3.72816281]
+        array([2., 3., 0.])
         """
         values = []
         for function in functions_array:
@@ -373,3 +423,8 @@ class rAd_Var():
                 raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({len(var_values)}).")
             values.append(function(*variables).get_val())
         return np.array(values)
+
+if __name__=='__main__':
+    import doctest
+    doctest.testmod(verbose = False)
+    print("Passed all doctests!")
