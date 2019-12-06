@@ -2,13 +2,13 @@ import numpy as np
 import numbers as numbers
 
 class rAd_Var():
-    def __init__(self, val, ders=None):
+    def __init__(self, val):
         # Extract single element from array (Jacobian workaround)
         if type(val) is np.ndarray and len(val) == 1:
             val = val[0]
         if isinstance(val, numbers.Number):
             self._val = np.array([val]).reshape(-1,)
-            self._ders = ders
+            self._ders = None
             self.parents = []
             self.children = []
             self.seen = False # Set to True during runreverse() traversal, then reset at end
@@ -187,6 +187,7 @@ class rAd_Var():
     def sin(self):
         rad_object = rAd_Var(np.sin(self._val))
         self.children.append((rad_object, (np.cos(self._val))))
+        rad_object.parents = [self]
         return rad_object
 
     def cos(self):
@@ -237,12 +238,6 @@ class rAd_Var():
         rad_object.parents = [self]
         return rad_object
 
-    def sinh(self):
-        rad_object = rAd_Var(np.sinh(self._val))
-        self.children.append((rad_object, np.cosh(self._val)))
-        rad_object.parents = [self]
-        return rad_object
-
     def cosh(self):
         rad_object = rAd_Var(np.cosh(self._val))
         self.children.append((rad_object, np.sinh(self._val)))
@@ -258,13 +253,12 @@ class rAd_Var():
     def get_originals(self):
         # Walk through tree, finding nodes without parents
         ancestorlist = []
-        seen = []
         if self.parents:
             for parent in self.parents:
                 if not parent.seen:
                     ancestorlist.append(parent) 
                     ancestorlist += parent.get_originals()
-                    # parent.seen = True
+                    parent.seen = True
         
         # Reset all nodes in tree to unseen for future traversals
         for ancestor in ancestorlist:

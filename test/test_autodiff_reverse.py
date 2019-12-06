@@ -158,6 +158,36 @@ def test_sqrt():
     assert(f.get_val() == 4)
     assert(ders == 1/8)
 
+def test_trig():
+    # Scalar
+    a = rAd_Var(np.pi/4)
+    b = rAd_Var.sin(a)
+    c = rAd_Var.cos(a)
+    d = rAd_Var.tan(a)
+    ders_b = b.runreverse()
+    ders_c = c.runreverse()
+    ders_d = d.runreverse()
+    print(ders_d)
+    assert(b.get_val() == np.sin(np.pi/4))
+    np.testing.assert_almost_equal(ders_b, np.cos(np.pi/4))
+    assert(c.get_val() == np.cos(np.pi/4))
+    np.testing.assert_almost_equal(ders_c, np.sin(np.pi/4))
+    assert(d.get_val() == np.tan(np.pi/4))
+    np.testing.assert_almost_equal(ders_d, 1/np.cos(np.pi/4)**2)
+
+def test_inverse_trig():
+    pass
+
+def test_multi_parent():
+    x = rAd_Var(1)
+    y = rAd_Var(2)
+    x1 = x * y
+    x2 = x1.exp()
+    x3 = x1 + x2
+    ders = x3.runreverse()
+    np.testing.assert_almost_equal(x3.get_val(), 2 + (np.e ** 2))
+    np.testing.assert_array_almost_equal(ders, [2+(2 * np.e ** 2), 1 + (np.e ** 2)])
+
 def test_input():
     try:
         print(rAd_Var('NaN'))
@@ -192,9 +222,9 @@ def test_get_val():
     def f3(x, y):
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
 
-    return rAd_Var.get_values([f1, f2, f3], [1, 2])
-
     np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], [1, 2]), [2.16120922, 1.16666667, 3.72816281])
+
+    return rAd_Var.get_values([f1, f2, f3], [1, 2])
 
 test_exp()
 test_add()
@@ -205,7 +235,9 @@ test_pow()
 test_eq()
 test_neg()
 test_sqrt()
+test_trig()
 test_input()
 test_log()
 test_jacobian()
+test_multi_parent()
 print("All tests passed!")
