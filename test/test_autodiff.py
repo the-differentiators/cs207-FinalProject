@@ -13,6 +13,36 @@ sys.path.append('../')
 
 from src.AutoDiff import Ad_Var
 
+def test_comparison():
+    ## scaler
+    a = Ad_Var(1,-3)
+    b = Ad_Var(1,-3)
+    c = Ad_Var(2,4)
+    assert a == b
+    assert a!= c
+    ## gradient
+    x1 = Ad_Var(1, np.array([1, 0]))
+    x2 = Ad_Var(1, np.array([1, 0]))
+    x3 = Ad_Var(1, np.array([2, 0]))
+    assert x1 == x2
+    assert x1 != x3
+    try:
+        a == x1
+    except TypeError:
+        print("TypeError successfully caught - comparison")
+        
+def test_neg():
+    ## scaler
+    a = Ad_Var(1,-3)
+    b = -a
+    assert b.get_val() == -1
+    assert b.get_ders() == 3
+    ## gradient
+    x1 = Ad_Var(1, np.array([1, 0]))
+    x2 = -x1
+    assert x2.get_val() == -1
+    assert (x2.get_ders() == [-1,0]).all()
+
 def test_exp():
     ## scaler
     a = Ad_Var(1,-3)
@@ -78,6 +108,58 @@ def test_inverse_trig():
     f = Ad_Var.arcsin(x1) + Ad_Var.arccos(x2) + Ad_Var.arctan(x3)
     assert f.get_val() == 1.7610626216439926
     assert (f.get_ders() == [1.005037815259212, -1.0206207261596576, 0.9174311926605504]).all()
+    e = Ad_Var(-3,2)
+    try:
+        f = Ad_Var.arcsin(e)
+    except ValueError:
+        print("ValueError successfully caught - inversetsin")
+    try:
+        f = Ad_Var.arccos(e)
+    except ValueError:
+        print("ValueError successfully caught - inversecos")
+    try:
+        f = Ad_Var.arctan(e)
+    except ValueError:
+        print("ValueError successfully caught - inversetan")
+
+def test_hyperbolic():
+    ## scalar
+    a = Ad_Var(0.1,-3)
+    b = Ad_Var.sinh(a)
+    c = Ad_Var.cosh(a)
+    d = Ad_Var.tanh(a)
+    assert b.get_val() == np.sinh(0.1)
+    assert b.get_ders() == -3*np.cosh(0.1)
+    assert c.get_val() == np.cosh(0.1)
+    assert c.get_ders() == -3*np.sinh(0.1)
+    assert d.get_val() == np.tanh(0.1)
+    assert d.get_ders() == -3*(1 - np.tanh(0.1)**2)
+    ## gradient
+    x1 = Ad_Var(0.1, np.array([1, 0, 0]))
+    x2 = Ad_Var(0.2, np.array([0, 1, 0]))
+    x3 = Ad_Var(0.3, np.array([0, 0, 1]))
+    f = Ad_Var.sinh(x1) + Ad_Var.cosh(x2) - Ad_Var.tanh(x3)
+    assert f.get_val() == np.sinh(0.1) + np.cosh(0.2) - np.tanh(0.3)
+    assert (f.get_ders() == [np.cosh(0.1), np.sinh(0.2), -1+np.tanh(0.3)**2]).all()
+
+def test_logistic():
+
+    def sigmoid(x):
+        return 1.0/(1 + np.exp(-x))
+
+    def sigmoid_derivative(x):
+        der = (1 - sigmoid(x)) * sigmoid(x)
+        return der
+
+    a = Ad_Var(1,2)
+    b = Ad_Var.logistic(a)
+    assert b.get_val() == sigmoid(1)
+    assert b.get_ders() == 2*sigmoid_derivative(1)
+    x1 = Ad_Var(0.1,np.array([1,0]))
+    x2 = Ad_Var(0.2,np.array([0,1]))
+    f = Ad_Var.logistic(x1) - Ad_Var.logistic(x2)
+    assert f.get_val() == sigmoid(0.1) - sigmoid(0.2)
+    assert (f.get_ders() == [sigmoid_derivative(0.1), -sigmoid_derivative(0.2)]).all()
 
 def test_pow():
     ## scalar
@@ -90,7 +172,7 @@ def test_pow():
     try:
         d_exception = 'not a number' ** c
     except TypeError:
-        print("Type error successfully caught - rpow")
+        print("TypeError successfully caught - rpow")
     d = 2 ** c
     assert d.get_val() == 4
     assert d.get_ders() == np.log(2) * 4
@@ -108,15 +190,15 @@ def test_pow():
         a = Ad_Var(1,3)
         b = a**'s'
     except TypeError:
-        print("Type Error sucessfully catched - pow")
+        print("TypeError sucessfully catched - pow")
     ## gradient (rpow)
     f2 = 2 ** x1 + 2 ** x2
     print(f2)
     print([2 * np.log(2), 4 * np.log(2)])
     assert f2.get_val() == 6.0
     assert (f.get_ders() == [2., -3/16]).all()
-    
-    
+
+
 def test_sub1():
     x1 = Ad_Var(1, np.array([1, 0]))
     x2 = Ad_Var(2, np.array([0, 1]))
@@ -129,14 +211,14 @@ def test_sub2():
     x2 = 2
     f = x2 - x1
     assert f.get_val() == 1
-    assert f.get_ders() == 1
+    assert f.get_ders() == -1
 
 def test_sub3():
     x1 = Ad_Var(1,np.array([1,0]))
     x2 = 2
     f = x2 - x1
     assert f.get_val() == 1
-    assert (f.get_ders() == [1, 0]).all()
+    assert (f.get_ders() == [-1, 0]).all()
 
 def test_sub4():
     x1 = Ad_Var(5)
@@ -158,7 +240,7 @@ def test_div2():
     f = (x1+1)/x2 + x2/(x1+1)
     assert f.get_val() == 2
     assert f.get_ders() == 0 #1/2 - 1/2
-    
+
 def test_mul1():
     x1 = Ad_Var(1, np.array([1, 0]))
     x2 = Ad_Var(2, np.array([0, 1]))
@@ -171,7 +253,7 @@ def test_mul2():
     x2 = 2
     f = (x1+1)*x2 + x2*(x1+1)
     assert f.get_val() == 8
-    assert f.get_ders() == 4 
+    assert f.get_ders() == 4
 
 def test_multiple():
     x = Ad_Var(1, np.array([1, 0, 0]))
@@ -208,7 +290,7 @@ def test_input():
         d = Ad_Var(2,np.array([1,2,'dog']))
     except TypeError:
         print("TypeError sucessfully catched - der2")
-        
+
 def test_func():
     x = Ad_Var(1, np.array([1, 0, 0]))
     y = Ad_Var(2, np.array([0, 1, 0]))
@@ -242,12 +324,80 @@ def test_func():
         Ad_Var.get_jacobian(f,5,4)
     except ValueError:
         print("ValueError sucessfully catched - get_jacobian3")
- 
 
+def test_grid_eval():
+    #scalar function - one variable
+    x = Ad_Var()
+    f_str = "x**2 + 2*x"
+    dict = Ad_Var.grid_eval(f_str, ['x'], [x], [[2, 5]])
+    assert dict[(2,)] == (8, 6)
+    assert dict[(5,)] == (35, 12)
+
+    #scalar function - two variables
+    x = Ad_Var(ders = np.array([1, 0]))
+    y = Ad_Var(ders = np.array([0, 1]))
+    f_str = "x**2 * 3*y"
+    dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    #assert first point of the grid
+    assert dict[(1,2)][0] == 6 #assert value
+    assert (dict[(1,2)][1] ==  [12, 3]).all() #assert gradient
+    #assert second point of grid
+    assert dict[(1,3)][0] == 9
+    assert (dict[(1, 3)][1] == [18, 3]).all()
+
+    #vector function - two functions of two variables
+    f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+    dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    assert (dict[(1,2)][0] == np.array([6, np.exp(1)])).all() #assert the value of the vector valued function
+    assert (dict[(1,2)][1] == np.array([[12, 3], [np.exp(1), 0]])).all() #assert the jacobian
+    assert (dict[(1,3)][0] == np.array([9, np.exp(1)])).all()  # assert the value of the vector valued function
+    assert (dict[(1,3)][1] == np.array([[18, 3], [np.exp(1), 0]])).all()  # assert the jacobian
+
+    try:
+        f_str = "[x**2 * 3*y, ad.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[1], [2, 3]])
+    except NameError:
+        print("NameError successfully catched - ad is not the scope of grid_eval, Ad_Var should be used in func_string.")
+
+    try:
+        f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[2, 3]])
+    except ValueError:
+        print("ValueError successfully catched - a list of values for each variable should be passed to create the grid.")
+
+    try:
+        f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x'], [x, y], [[2, 3]])
+    except ValueError:
+        print("ValueError successfully catched - list of strings should have equal length to list of Ad_Var objects.")
+
+    try:
+        f_str = "[x**2 * 3*y, Ad_Var.exp(x)]"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'a'], [x, y], [[2, 3]])
+    except NameError:
+        print("NameError successfully catched - test_grid_eval")
+
+    try:
+        f_str = "import os"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[2, 3]])
+    except ValueError:
+        print("ValueError successfully catched - test_grid_eval")
+
+    try:
+        f_str = "a*5 + x*y"
+        dict = Ad_Var.grid_eval(f_str, ['x', 'y'], [x, y], [[2, 3]])
+    except NameError:
+        print("NameError successfully catched - function string contains a which is not in the variables passed.")
+
+
+test_comparison()
+test_neg()
 test_exp()
 test_log()
 test_trig()
 test_inverse_trig()
+test_hyperbolic()
+test_logistic()
 test_pow()
 test_sub1()
 test_sub2()
@@ -260,4 +410,5 @@ test_multiple()
 test_eq()
 test_func()
 test_input()
+test_grid_eval()
 print("All tests passed!")
