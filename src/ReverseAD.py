@@ -10,7 +10,7 @@ class rAd_Var():
         self.seen = False # Set to True during runreverse() traversal, then reset at end
 
     def __str__(self):
-        return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()} and tag {self.debug_tag}'
+        return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()}'
 
     def get_val(self):
         return self._val

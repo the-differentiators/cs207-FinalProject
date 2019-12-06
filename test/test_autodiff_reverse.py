@@ -96,6 +96,19 @@ def test_div():
     ders = x1.runreverse()
     assert(x1.get_val() == 2)
 
+def test_log():
+    # Scalar
+    a = Ad_Var(5)
+    b = a.log()
+    ders = b.runreverse()
+    assert(b.get_val() == np.log(5))
+    assert(ders == .2)
+    c = Ad_Var(np.e)
+    d = c.log()
+    ders = d.runreverse()
+    assert(d.get_val() == 1)
+    assert(ders == 1/np.e)
+
 def test_pow():
     # Scalar
     a = Ad_Var(2)
@@ -125,6 +138,23 @@ def test_pow():
     assert(x1.get_val() == 16)
     assert(ders == [32, 64*np.log(2), 64*(np.log(2) ** 2)]).all()
 
+def test_eq():
+    a = Ad_Var(1)
+    b = Ad_Var(1)
+    c = Ad_Var(2)
+    assert(a == b and a != c)
+
+def test_input():
+    try:
+        print(Ad_Var('NaN'))
+    except:
+        print("Input test 1 passed.")
+    try:
+        print(Ad_Var(None))
+    except:
+        print("Input test 2 passed.")
+
+
 def test_jacobian():
     x = Ad_Var(1)
     y = Ad_Var(2)
@@ -139,6 +169,9 @@ test_sub()
 test_mul()
 test_div()
 test_pow()
+test_eq()
+test_input()
+test_log()
 print("All tests passed!")
 
 # >> > f.outer()
