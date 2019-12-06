@@ -16,24 +16,59 @@ class rAd_Var():
             raise TypeError("Value should be one instance of numeric type.")
 
     def __str__(self):
-        return f'Reverse Autodiff Object with value {self._val} and gradient {self.gradient()}'
+        return f'Reverse Autodiff Object with value {self._val} and gradient {self.get_ders()}'
+
+    def set_val(self, value):
+        """
+        Sets the value for the rAd_Var instance passed.
+        Parameters
+        ==========
+        self: rAd_Var
+        value: variable value to be set
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> x.set_val(4)
+        >>> x.get_val()
+        4
+        """
+        self._val = value
+
+    def set_ders(self, derivatives):
+        """
+        Sets the derivative for the rAd_Var instance passed.
+        Parameters
+        ==========
+        self: rAd_Var
+        derivatives: variable derivative to be set
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> x.set_ders(4)
+        >>> x.get_ders()
+        4
+        """
+        self._ders = derivatives
 
     def get_val(self):
         return self._val
 
     def get_ders(self):
+        if self._ders is None:
+            new_deriv = sum(weight * var.get_ders() for var, weight in self.children)
+            self.set_ders(new_deriv)
         return self._ders
 
     def __add__(self, other):
         try:
             rad_object = rAd_Var(self._val + other._val)
-            self.children.append((rad_object, np.ones(len(self._val))))
-            other.children.append((rad_object, np.ones(len(self._val))))
+            self.children.append((rad_object, 1))
+            other.children.append((rad_object, 1))
             rad_object.parents = [self, other]
             return rad_object
         except AttributeError:
             rad_object = rAd_Var(self._val + other)
-            self.children.append((rad_object, np.ones(len(self._val))))
+            self.children.append((rad_object, 1))
             rad_object.parents = [self]
             return rad_object
 
@@ -43,13 +78,13 @@ class rAd_Var():
     def __sub__(self, other):
         try:
             rad_object = rAd_Var(self._val - other._val)
-            self.children.append((rad_object, np.ones(len(self._val))))
-            other.children.append((rad_object, -1 * np.ones(len(self._val))))
+            self.children.append((rad_object, 1))
+            other.children.append((rad_object, -1 ))
             rad_object.parents = [self, other]
             return rad_object
         except AttributeError:
             rad_object = rAd_Var(self._val - other)
-            self.children.append((rad_object, np.ones(len(self._val))))
+            self.children.append((rad_object, 1))
             rad_object.parents = [self]
             return rad_object
 
@@ -65,7 +100,7 @@ class rAd_Var():
             return rad_object
         except AttributeError:
             rad_object = rAd_Var(self._val * other)
-            self.children.append((rad_object, np.array([other] * len(self._val))))
+            self.children.append((rad_object, other))
             rad_object.parents = [self]
             return rad_object
 
@@ -86,8 +121,13 @@ class rAd_Var():
             return rad_object
 
     def __rtruediv__(self, other):
-        # TODO
-        pass
+        try:
+            return other / self
+        except AttributeError:
+            rad_object = rAd_Var(other / self._val)
+            self.children.append((rad_object, - other / (self._val**2)))
+            rad_object.parents = [self]
+            return rad_object
 
     def __pow__(self, other):
         try:
@@ -112,7 +152,7 @@ class rAd_Var():
             raise TypeError("Base should be an instance of numeric type.")
 
     def __eq__(self, other):
-        if self._val == other._val and self.gradient() == other.gradient():
+        if self._val == other._val and self.get_ders() == other.get_ders():
             return True
         else:
             return False
@@ -139,7 +179,7 @@ class rAd_Var():
         return rad_object
 
     def log(self, logbase=np.e):
-        rad_object = rAd_Var(np.log(self._val), np.log(logbase))
+        rad_object = rAd_Var(np.log(self._val))
         self.children.append((rad_object, 1/(self._val*np.log(logbase))))
         rad_object.parents = [self]
         return rad_object
@@ -158,17 +198,20 @@ class rAd_Var():
     def tan(self):
         rad_object = rAd_Var(np.tan(self._val))
         self.children.append((rad_object, 1/(np.cos(self._val))**2))
+        rad_object.parents = [self]
         return rad_object
 
     def logistic(self):
         rad_object = rAd_Var(1/(1+np.exp(-self._val)))
         self.children.append((rad_object, (np.exp(-self._val)/((np.exp(-self._val)+1)**2))))
+        rad_object.parents = [self]
         return rad_object
 
     def arcsin(self):
         if -1 <= self._val <= 1:
             rad_object = rAd_Var(np.arcsin(self._val))
             self.children.append((rad_object, 1/np.sqrt(1 - (self._val ** 2))))
+            rad_object.parents = [self]
             return rad_object
         else:
             raise ValueError('The domain of the inverse trig function should be [-1,1]')
@@ -177,6 +220,7 @@ class rAd_Var():
         if -1 <= self._val <= 1:
             rad_object = rAd_Var(np.arccos(self._val))
             self.children.append((rad_object, -1/np.sqrt(1 - (self._val ** 2))))
+            rad_object.parents = [self]
             return rad_object
         else:
             raise ValueError('The domain of the inverse trig function should be [-1,1]')
@@ -184,32 +228,32 @@ class rAd_Var():
     def arctan(self):
         rad_object = rAd_Var(np.arctan(self._val))
         self.children.append((rad_object, 1/(1 + self._val ** 2)))
+        rad_object.parents = [self]
         return rad_object
 
     def sinh(self):
         rad_object = rAd_Var(np.sinh(self._val))
         self.children.append((rad_object, np.cosh(self._val)))
+        rad_object.parents = [self]
         return rad_object
 
     def sinh(self):
         rad_object = rAd_Var(np.sinh(self._val))
         self.children.append((rad_object, np.cosh(self._val)))
+        rad_object.parents = [self]
         return rad_object
 
     def cosh(self):
         rad_object = rAd_Var(np.cosh(self._val))
         self.children.append((rad_object, np.sinh(self._val)))
+        rad_object.parents = [self]
         return rad_object
 
     def tanh(self):
         rad_object = rAd_Var(np.tanh(self._val))
         self.children.append((rad_object, (1 - np.tanh(self._val)**2)))
+        rad_object.parents = [self]
         return rad_object
-
-    def gradient(self):
-        if self._ders is None:
-            self._ders = sum(weight * var.gradient() for var, weight in self.children)
-        return self._ders
 
     def get_originals(self):
         # Walk through tree, finding nodes without parents
@@ -217,7 +261,6 @@ class rAd_Var():
         seen = []
         if self.parents:
             for parent in self.parents:
-                # parent._ders = None
                 if not parent.seen:
                     ancestorlist.append(parent) 
                     ancestorlist += parent.get_originals()
@@ -230,7 +273,7 @@ class rAd_Var():
         return ancestorlist
 
     def runreverse(self):
-        self._ders = 1.0
+        self.set_ders(1.0)
         originals = []
         seen_ids = []
         gradient_matrix = np.array([])
@@ -240,64 +283,99 @@ class rAd_Var():
                 seen_ids.append(id(ancestor))
 
         for original in originals:
-            gradient_matrix = np.append(gradient_matrix, original.gradient())
+            gradient_matrix = np.append(gradient_matrix, original.get_ders())
 
         return gradient_matrix
 
     @staticmethod
-    def get_jacobian(variables, functions_array):
+    def get_jacobian(functions_array, var_values):
         """
-        Returns the jacobian matrix for a vector-valued function
+        Returns the jacobian matrix for a vector of functions, with given values for variables in the function
         INPUTS
         =======
-        functions_array: numpy array of Ad_Var objects
-            a vector of functions which make up the vector-valued function together
-        functions_dim: int
-           the number of different functions which make up the vector-valued function
-        vars_dim: int
-           the total number of variables of the vector-valued function
+        functions_array: numpy array of Python function
+            a vector of functions passed into the method
+        var_values: numpy array of numeric values
+           values for variables in the functions array
         RETURNS
         ========
-        jacobian: a numpy array with shape (functions_dim, vars_dim)
-            the jabocian matrix of the vector-valued function
+        jacobian: a numpy array with shape (len(functions_array), len(var_values)), the jacobian matrix of the vector-valued function
         NOTES
         =====
         PRE:
              - functions_array is a numpy array of only Ad_Var objects
-             - the gradient vector of each function in functions_array must have dimensions equal vars_dim
+             - the gradient vector of each function in functions_array must have dimensions equal to vars_dim
                i.e. all functions in functions_array live in a space of equal dimensions.
         POST:
              - the values or the derivatives of the functions in functions_array are not changed
              - the result of get_jacobian is a numpy 2D array and not an Ad_Var object
-             - raises a TypeError exception if any of the elements of the functions_array are not of type Ad_Var
-             - raises a ValueError exception if the gradient of any of the elements of the functions_array have not length equal to vars_dim
+             - raises a ValueError exception if the number of arguments required for a function is greater than the number of input variables
         EXAMPLES
         =========
-        >>> x = rAd_Var(1)
-        >>> y = rAd_Var(2)
-        >>> f = np.array(["rAd_Var.cos(x) * (y + 2)", "1 + x ** 2 / (x * y * 3)", "3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)"])
-        >>> rAd_Var.get_jacobian(f, 3, 2)
+        >>> def f1(x, y):
+        ...  rAd_Var.cos(x) * (y + 2)
+        >>> def f2(x,y):
+        ...  return 1 + x ** 2 / (x * y * 3)
+        >>> def f3(x, y):
+        ...  return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
+        >>> rAd_Var.get_jacobian([f1, f2, f3], [1, 2]
         [[-3.36588394  0.54030231]
         [ 0.16666667 -0.08333333]
         [ 3.82436064 -0.41218032]]
         """
+
         #input is a numpy array of Ad_Var function
         functions_dim = len(functions_array)
-        vars_dim = len(variables)
+        vars_dim = len(var_values)
 
         jacobian = np.zeros((functions_dim, vars_dim))
-        x, y = variables
         for i, function in enumerate(functions_array):
-            function = eval(function)
-            jacobian[i] = function.runreverse()
-            function.reset_var()
-            if type(function).__name__ != 'rAd_Var':
-                raise TypeError("The list of functions inputted is not a numpy array of Ad_Var objects.")
+            variables = []
+            for value in var_values:
+                variables.append(rAd_Var(value))
+            if len(function.__code__.co_varnames) > len(variables):
+                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
+            jacobian[i] = function(*variables).runreverse()
+
         return jacobian
 
-    def reset_var(self):
-        for ancestor in self.get_originals():
-            ancestor._ders = None
-            ancestor.parents = []
-            ancestor.children = []
-
+    @staticmethod
+    def get_values(functions_array, var_values):
+        """
+        Returns the values of for a vector-valued function evaluated at a point in higher dimensions.
+        INPUTS
+        =======
+        functions_array: numpy array of Python function
+            a vector of functions passed into the method
+        var_values: numpy array of numeric values
+           values for variables in the functions array
+        RETURNS
+        ========
+        values: a numpy array with shape (functions_dim,)
+            the vector with the values of the vector-valued function evaluated at a point
+        NOTES
+        =====
+        PRE:
+             - functions_array is a numpy array of only Ad_Var objects
+        POST:
+             - raises a TypeError exception if any of the elements of the functions_array are not of type Ad_Var
+        EXAMPLES
+        =========
+        >>> def f1(x, y):
+        ...  rAd_Var.cos(x) * (y + 2)
+        >>> def f2(x,y):
+        ...  return 1 + x ** 2 / (x * y * 3)
+        >>> def f3(x, y):
+        ...  return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
+        >>> rAd_Var.get_values([f1, f2, f3], [1, 2])
+        [2.16120922 1.16666667 3.72816281]
+        """
+        values = []
+        for function in functions_array:
+            variables = []
+            for value in var_values:
+                variables.append(rAd_Var(value))
+            if len(function.__code__.co_varnames) > len(variables):
+                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({len(var_values)}).")
+            values.append(function(*variables).get_val())
+        return np.array(values)
