@@ -140,6 +140,11 @@ def test_pow():
     ders_g = g.runreverse()
     assert(g.get_val() == 81)
     assert(ders_g == [81*np.log(3)])
+    # Rpow bad input test.
+    try:
+        bad = 'NaN' ** c
+    except:
+        print("Rpow non-numeric base test passed!")
     # Gradient
     x = rAd_Var(2)
     y = rAd_Var(2)
@@ -198,6 +203,15 @@ def test_trig():
 
 
 def test_inverse_trig():
+    # Improper input test
+    try:
+        bad_arcsin = rAd_Var.arcsin(-2)
+    except:
+        print("Arcsin domain test passed!")
+    try:
+        bad_arccos = rAd_Var.arccos(-2)
+    except:
+        print("Arcos domain test passed!")
     # Scalar
     a1, a2, a3 = rAd_Var(0.1), rAd_Var(0.1), rAd_Var(0.1)
     b = rAd_Var.arcsin(a1)
@@ -284,6 +298,11 @@ def test_input():
         print(rAd_Var(None))
     except TypeError:
         print("Input test 2 passed.")
+    a = rAd_Var(np.array([42]))
+    a.set_val(5)
+    assert(a.get_val() == 5)
+    print(a)
+    repr(a)
 
 def test_jacobian():
 
