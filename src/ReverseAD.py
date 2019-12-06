@@ -258,8 +258,8 @@ class rAd_Var():
         Returns the jacobian matrix for a vector of functions, with given values for variables in the function
         INPUTS
         =======
-        functions_array: numpy array of Pythons function
-            a vector of functions passed into
+        functions_array: numpy array of Python function
+            a vector of functions passed into the method
         var_values: numpy array of numeric values
            values for variables in the functions array
         RETURNS
@@ -298,7 +298,6 @@ class rAd_Var():
             variables = []
             for value in var_values:
                 variables.append(rAd_Var(value))
-            print(len(function.__code__.co_varnames))
             if len(function.__code__.co_varnames) > len(variables):
                 raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
             jacobian[i] = function(*variables).runreverse()
