@@ -205,12 +205,12 @@ def test_trig():
 def test_inverse_trig():
     # Improper input test
     try:
-        bad_arcsin = rAd_Var.arcsin(-2)
-    except:
+        bad_arcsin = rAd_Var(-2).arcsin()
+    except ValueError:
         print("Arcsin domain test passed!")
     try:
-        bad_arccos = rAd_Var.arccos(-2)
-    except:
+        bad_arccos = rAd_Var(-2).arccos()
+    except ValueError:
         print("Arcos domain test passed!")
     # Scalar
     a1, a2, a3 = rAd_Var(0.1), rAd_Var(0.1), rAd_Var(0.1)
