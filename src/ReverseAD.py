@@ -20,7 +20,8 @@ class rAd_Var():
             self._val = val
 
         else:
-            self._val = np.array([val]).reshape(-1, )
+            raise TypeError()
+            # self._val = np.array([val]).reshape(-1, )
 
         self._ders = None
         self.parents = []
@@ -199,13 +200,10 @@ class rAd_Var():
             return rad_object
 
     def __rtruediv__(self, other):
-        try:
-            return other / self
-        except AttributeError:
-            rad_object = rAd_Var(other / self._val)
-            self.children.append((rad_object, - other / (self._val**2)))
-            rad_object.parents = [self]
-            return rad_object
+        rad_object = rAd_Var(other / self._val)
+        self.children.append((rad_object, - other / (self._val**2)))
+        rad_object.parents = [self]
+        return rad_object
 
     def __pow__(self, other):
         try:

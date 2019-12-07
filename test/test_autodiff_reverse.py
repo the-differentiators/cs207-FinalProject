@@ -25,9 +25,9 @@ def test_exp():
 
 def test_add():
     # Scalar
-    a = rAd_Var(99)
+    a, b = rAd_Var(99), rAd_Var(99)
     f = a + 1
-    g = 1 + a
+    g = 1 + b
     ders_f = f.runreverse()
     ders_g = g.runreverse()
     assert(ders_f == ders_g and f.get_val() == g.get_val())
@@ -50,6 +50,13 @@ def test_sub():
     ders = f.runreverse()
     assert(f.get_val() == 100)
     assert(ders == [1])
+    # Rsub
+    c = rAd_Var(50)
+    d = 100
+    g = d - c
+    ders = g.runreverse()
+    assert(g.get_val() == 50)
+    assert(ders == -1)
     # Gradient
     x = rAd_Var(500)
     y = rAd_Var(100)
@@ -64,7 +71,8 @@ def test_mul():
     a = rAd_Var(12)
     b = 3
     f = a * b
-    g = b * a
+    c = rAd_Var(12)
+    g = b * c
     ders_f = f.runreverse()
     ders_g = g.runreverse()
     assert(f.get_val() == g.get_val() == 36)
@@ -84,11 +92,14 @@ def test_div():
     a = rAd_Var(20)
     b = 2
     f = a / b
-    # g = b / a
+    c = rAd_Var(20)
+    g = b / c
     ders_f = f.runreverse()
-    # ders_g = g.runreverse()
+    ders_g = g.runreverse()
     assert(f.get_val() == 10)
-    # assert(g.get_val() == 0.5)
+    assert(g.get_val() == 0.1)
+    assert(ders_f == 1/2)
+    assert(ders_g == -1/200)
     # Gradient
     x = rAd_Var(10)
     y = rAd_Var(5)
@@ -129,6 +140,11 @@ def test_pow():
     ders_g = g.runreverse()
     assert(g.get_val() == 81)
     assert(ders_g == [81*np.log(3)])
+    # Rpow bad input test.
+    try:
+        bad = 'NaN' ** c
+    except:
+        print("Rpow non-numeric base test passed!")
     # Gradient
     x = rAd_Var(2)
     y = rAd_Var(2)
@@ -160,9 +176,8 @@ def test_sqrt():
 
 def test_trig():
     # Scalar
-    a = rAd_Var(np.pi/4)
-    b = rAd_Var.sin(a)
-    c = rAd_Var.cos(a)
+    b = rAd_Var.sin(rAd_Var(np.pi/4))
+    c = rAd_Var.cos(rAd_Var(np.pi/4))
     d = rAd_Var(np.pi)
     e = rAd_Var.tan(d)
     ders_b = b.runreverse()
@@ -171,7 +186,7 @@ def test_trig():
     assert(b.get_val() == np.sin(np.pi/4))
     np.testing.assert_almost_equal(ders_b, np.cos(np.pi/4))
     assert(c.get_val() == np.cos(np.pi/4))
-    np.testing.assert_almost_equal(ders_c, np.sin(np.pi/4))
+    np.testing.assert_almost_equal(ders_c, -np.sin(np.pi/4))
     assert(e.get_val() == np.tan(np.pi))
     np.testing.assert_almost_equal(ders_e, 1/np.cos(np.pi)**2)
     a1 = rAd_Var(np.pi)
@@ -188,6 +203,15 @@ def test_trig():
 
 
 def test_inverse_trig():
+    # Improper input test
+    try:
+        bad_arcsin = rAd_Var(-2).arcsin()
+    except ValueError:
+        print("Arcsin domain test passed!")
+    try:
+        bad_arccos = rAd_Var(-2).arccos()
+    except ValueError:
+        print("Arcos domain test passed!")
     # Scalar
     a1, a2, a3 = rAd_Var(0.1), rAd_Var(0.1), rAd_Var(0.1)
     b = rAd_Var.arcsin(a1)
@@ -211,6 +235,50 @@ def test_inverse_trig():
     assert f.get_val() == 1.7610626216439926
     assert (ders == [1.005037815259212, -1.0206207261596576, 0.9174311926605504]).all()
 
+def test_logistic():
+    def sigmoid(x):
+        return 1.0/(1 + np.exp(-x))
+
+    def sigmoid_derivative(x):
+        der = (1 - sigmoid(x)) * sigmoid(x)
+        return der
+
+    a = rAd_Var(1)
+    b = rAd_Var.logistic(a)
+    ders = b.runreverse()
+    assert b.get_val() == sigmoid(1)
+    np.testing.assert_almost_equal(ders, sigmoid_derivative(1))
+    x1 = rAd_Var(0.1)
+    x2 = rAd_Var(0.2)
+    f = rAd_Var.logistic(x1) - rAd_Var.logistic(x2)
+    ders = f.runreverse()
+    assert f.get_val() == sigmoid(0.1) - sigmoid(0.2)
+    np.testing.assert_array_almost_equal(ders, [sigmoid_derivative(0.1), -sigmoid_derivative(0.2)])
+
+def test_hyperbolic():
+    # Scalar
+    a1, a2, a3 = rAd_Var(0.1), rAd_Var(0.1), rAd_Var(0.1)
+    b = rAd_Var.sinh(a1)
+    c = rAd_Var.cosh(a2)
+    d = rAd_Var.tanh(a3)
+    ders_b = b.runreverse()
+    ders_c = c.runreverse()
+    ders_d = d.runreverse()
+    assert b.get_val() == np.sinh(0.1)
+    assert ders_b == np.cosh(0.1)
+    assert c.get_val() == np.cosh(0.1)
+    assert ders_c == np.sinh(0.1)
+    assert d.get_val() == np.tanh(0.1)
+    assert ders_d == (1 - np.tanh(0.1)**2)
+    # Gradient
+    x1 = rAd_Var(0.1)
+    x2 = rAd_Var(0.2)
+    x3 = rAd_Var(0.3)
+    f = rAd_Var.sinh(x1) + rAd_Var.cosh(x2) - rAd_Var.tanh(x3)
+    ders = f.runreverse()
+    assert f.get_val() == np.sinh(0.1) + np.cosh(0.2) - np.tanh(0.3)
+    np.testing.assert_array_almost_equal(ders, [np.cosh(0.1), np.sinh(0.2), -1+np.tanh(0.3)**2])
+
 def test_multi_parent():
     x = rAd_Var(1)
     y = rAd_Var(2)
@@ -230,6 +298,11 @@ def test_input():
         print(rAd_Var(None))
     except TypeError:
         print("Input test 2 passed.")
+    a = rAd_Var(np.array([42]))
+    a.set_val(5)
+    assert(a.get_val() == 5)
+    print(a)
+    repr(a)
 
 def test_jacobian():
 
@@ -255,7 +328,7 @@ def test_get_val():
     def f3(x, y):
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
 
-    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], [1, 2]), [[2.16120922], [1.16666667], [3.72816281]])
+    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], [1, 2]), np.array([2.161209, 1.166667, 3.728163]))
 
     return rAd_Var.get_values([f1, f2, f3], [1, 2])
 
@@ -272,6 +345,8 @@ test_trig()
 test_inverse_trig()
 test_input()
 test_log()
+test_logistic()
+test_hyperbolic()
 test_jacobian()
 test_get_val()
 test_multi_parent()
