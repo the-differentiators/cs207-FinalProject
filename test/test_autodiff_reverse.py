@@ -309,7 +309,18 @@ def test_jacobian():
         return 1 + x ** 2 / (x * y * 3)
     def f3(x, y):
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
-    np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], [1, 2]), [[-3.36588394, 0.54030231],[0.16666667, -0.08333333],[3.82436064, -0.41218032]])
+    np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], ["x", "y"], [1, 2]), [[-3.36588394, 0.54030231],[0.16666667, -0.08333333],[3.82436064, -0.41218032]])
+
+
+def test_jacobian2():
+    def f1(x, y, z, a):
+        return y + 2*x + z + a
+    def f2(x, z):
+        return 3 * x + z
+    def f3(x, y):
+        return rAd_Var.log(x ** y)
+
+    np.testing.assert_array_almost_equal(rAd_Var.get_jacobian([f1, f2, f3], ["x", "y", "z", "a"], [1, 2, 3, 4]),[[1 , 2, 1, 1], [3, 0 , 1, 0],[2, 0 , 0 ,0 ]])
 
 def test_get_val():
     def f1(x, y):
@@ -336,6 +347,7 @@ test_log()
 test_logistic()
 test_hyperbolic()
 test_jacobian()
+test_jacobian2()
 test_get_val()
 test_multi_parent()
 print("All tests passed!")

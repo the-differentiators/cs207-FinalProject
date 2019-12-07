@@ -817,7 +817,7 @@ class rAd_Var():
         return rad_object
 
     @staticmethod
-    def get_jacobian(functions_array, var_values):
+    def get_jacobian(functions_array, var_list, var_values):
         """
         Returns the jacobian matrix for a vector of functions, with given values for variables in the function
         INPUTS
@@ -858,13 +858,52 @@ class rAd_Var():
         vars_dim = len(var_values)
 
         jacobian = np.zeros((functions_dim, vars_dim))
+        list_partial_ders = []
+
+        # Raise error if the number of input variables does not match the value numbers
+        if len(var_list) != len(var_values):
+            raise ValueError(f"Number of input variables does not match the number of input values.")
+
+
+        # Create dictionary of variables to their input values
+        variable_value_dict = {}
+        for var, value in zip(var_list, var_values):
+            variable_value_dict[var] = value
+
+        # For the list of functions, create rAd_Var instances for variables used in the function
         for i, function in enumerate(functions_array):
-            variables = []
-            for value in var_values:
-                variables.append(rAd_Var(value))
-            if len(function.__code__.co_varnames) > len(variables):
+            func_variable = {}
+            func_variable_list = list(function.__code__.co_varnames)
+
+            for var in func_variable_list:
+                if var not in variable_value_dict:
+                    raise ValueError("The variable in your function is not defined in the constructor.")
+                func_variable[var] = rAd_Var(variable_value_dict[var])
+
+            if len(function.__code__.co_varnames) > len(func_variable):
                 raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
-            jacobian[i] = function(*variables).get_ders()
+
+            partial_der = function(**func_variable).get_ders()
+
+            dict_partial_der = {}
+            for variable, der in zip(func_variable_list, partial_der):
+                dict_partial_der[variable] = der
+
+            list_partial_ders.append(dict_partial_der)
+
+        #Get a full list of all variables from the dictionary
+        #Map the variable names to column number in the Jacobian
+        col_dict = {}
+        for index, var in enumerate(var_list):
+            col_dict[index] = var
+
+        #For each row in the jacobian matrix, assign values based on variable names; if it does not exist, assign 0
+        for i in range(jacobian.shape[0]):
+            partial_der = list_partial_ders[i]
+
+            for j in range(jacobian.shape[1]):
+                var_name = col_dict[j]
+                jacobian[i][j] = 0 if var_name not in partial_der else partial_der[var_name]
 
         return jacobian
 
