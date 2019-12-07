@@ -273,27 +273,46 @@ def test_eq():
     print(x)
     assert (x == y).all()
 
+def test_eq_input():
+    x = Ad_Var(1, np.array([1, 0, 0]))
+    y = Ad_Var(2, 1)
+
+    try:
+        x == y
+    except TypeError:
+        print("TypeERror successfully caught - Equality operator test 1")
+
+    try:
+        x != y
+    except TypeError:
+        print("TypeERror successfully caught - Equality operator test 2")
+
+    try:
+        y != x
+    except TypeError:
+        print("TypeERror successfully caught - Equality operator test 3")
+
 def test_input():
     try:
-        _ = Ad_Var('s',2)
+        f = Ad_Var('s',2)
     except TypeError:
         print("TypeError sucessfully catched - value1")
     try:
-        _ = Ad_Var([2,3,4],2)
+        f = Ad_Var([2,3,4],2)
     except TypeError:
         print("TypeError sucessfully catched - value2")
     try:
-        _ = Ad_Var(2,'s')
+        f = Ad_Var(2,'s')
     except TypeError:
         print("TypeError sucessfully catched - der1")
     try:
-        _ = Ad_Var(2,np.array([1,2,'dog']))
+        f = Ad_Var(2,np.array([1,2,'dog']))
     except TypeError:
         print("TypeError sucessfully catched - der2")
     try:
         a = Ad_Var(20)
         b = rAd_Var(5)
-        _ = a + b
+        f = a + b
     except TypeError:
         print("TypeError successfully catched - _typecheck_other")
 
@@ -417,6 +436,7 @@ test_mul1()
 test_mul2()
 test_multiple()
 test_eq()
+test_eq_input()
 test_func()
 test_input()
 test_grid_eval()
