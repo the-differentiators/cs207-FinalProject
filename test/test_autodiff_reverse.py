@@ -330,11 +330,11 @@ def test_jacobian2():
 def test_get_val():
     def f1(x, y):
         return rAd_Var.cos(x) * (y + 2)
-    def f2(x, y):
-        return 1 + x ** 2 / (x * y * 3)
+    def f2(x, z):
+        return 1 + x ** 2 / (x * z * 3)
     def f3(x, y):
         return 3 * rAd_Var.log(x * 2) + rAd_Var.exp(x / y)
-    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], [1, 2]), np.array([2.161209, 1.166667, 3.728163]))
+    np.testing.assert_array_almost_equal(rAd_Var.get_values([f1, f2, f3], ["x", "z", "y"], [1, 3, 2]), np.array([2.161209, 1.111111, 3.728163]))
 
 test_exp()
 test_add()

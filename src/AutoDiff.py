@@ -1856,11 +1856,10 @@ class rAd_Var():
         NOTES
         =====
         PRE:
-             - functions_array is a numpy array of only rAd_Var objects
+             - functions_array is a numpy array of Python functions
              - the gradient vector of each function in functions_array must have dimensions equal to vars_dim
                i.e. all functions in functions_array live in a space of equal dimensions.
         POST:
-             - the values or the derivatives of the functions in functions_array are not changed
              - the result of get_jacobian is a numpy 2D array and not an rAd_Var object
              - raises a ValueError exception if the number of arguments required for a function is greater than the number of input variables
         EXAMPLES
@@ -1932,13 +1931,15 @@ class rAd_Var():
         return jacobian
 
     @staticmethod
-    def get_values(functions_array, var_values):
+    def get_values(functions_array, var_list, var_values):
         """
         Returns the values of for a vector-valued function evaluated at a point in higher dimensions.
         INPUTS
         =======
         functions_array: numpy array of Python function
             a vector of functions passed into the method
+        var_list: numpy array of strings
+            variable names for variables in the functions array
         var_values: numpy array of numeric values
            values for variables in the functions array
         RETURNS
@@ -1959,17 +1960,36 @@ class rAd_Var():
         ...  return x + y
         >>> def f3(x, y):
         ...  return rAd_Var.log(x ** y)
-        >>> rAd_Var.get_values([f1, f2, f3], [1, 2])
+        >>> rAd_Var.get_values([f1, f2, f3], ["x", "y"], [1, 2])
         array([2., 3., 0.])
         """
         values = []
-        for function in functions_array:
-            variables = []
-            for value in var_values:
-                variables.append(rAd_Var(value))
-            if len(function.__code__.co_varnames) > len(variables):
-                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({len(var_values)}).")
-            values.append(function(*variables).get_val())
+
+        # Raise error if the number of input variables does not match the value numbers
+        if len(var_list) != len(var_values):
+            raise ValueError(f"Number of input variables does not match the number of input values.")
+
+
+        # Create dictionary of variables to their input values
+        variable_value_dict = {}
+        for var, value in zip(var_list, var_values):
+            variable_value_dict[var] = value
+
+        # For the list of functions, create rAd_Var instances for variables used in the function
+        for i, function in enumerate(functions_array):
+            func_variable = {}
+            func_variable_list = list(function.__code__.co_varnames)
+
+            for var in func_variable_list:
+                if var not in variable_value_dict:
+                    raise ValueError("The variable in your function is not defined in the constructor.")
+                func_variable[var] = rAd_Var(variable_value_dict[var])
+
+            if len(function.__code__.co_varnames) > len(func_variable):
+                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
+
+            values.append(function(**func_variable).get_val())
+
         return np.array(values)
 
     def get_ancestors(self):
