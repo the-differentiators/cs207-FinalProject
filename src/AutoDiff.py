@@ -596,7 +596,7 @@ class Ad_Var():
         >>> x1 = Ad_Var(np.pi/4)
         >>> f = Ad_Var.sin(x1)
         >>> f.get_val()
-        0.7071067811865475
+        0.7071067811865476
         >>> f.get_ders()
         0.7071067811865476
         """
@@ -619,7 +619,7 @@ class Ad_Var():
         >>> f.get_val()
         0.7071067811865476
         >>> f.get_ders()
-        -0.7071067811865475
+        -0.7071067811865476
         """
         return Ad_Var(np.cos(self._val), -self._ders*np.sin(self._val))
 
@@ -734,7 +734,7 @@ class Ad_Var():
         >>> f.get_val()
         0.8686709614860095
         >>> f.get_ders()
-        1.3246090892520057
+        1.324609089252006
         """
         return Ad_Var(np.sinh(self._val), self._ders*np.cosh(self._val))
 
@@ -753,7 +753,7 @@ class Ad_Var():
         >>> x1 = Ad_Var(np.pi/4)
         >>> f = Ad_Var.cosh(x1)
         >>> f.get_val()
-        1.3246090892520057
+        1.324609089252006
         >>> f.get_ders()
         0.8686709614860095
         """
@@ -1839,13 +1839,15 @@ class rAd_Var():
         return rad_object
 
     @staticmethod
-    def get_jacobian(functions_array, var_values):
+    def get_jacobian(functions_array, var_list, var_values):
         """
         Returns the jacobian matrix for a vector of functions, with given values for variables in the function
         INPUTS
         =======
         functions_array: numpy array of Python function
             a vector of functions passed into the method
+        var_list: numpy array of strings
+            variable names for variables in the functions array
         var_values: numpy array of numeric values
            values for variables in the functions array
         RETURNS
@@ -1854,11 +1856,10 @@ class rAd_Var():
         NOTES
         =====
         PRE:
-             - functions_array is a numpy array of only rAd_Var objects
+             - functions_array is a numpy array of Python functions
              - the gradient vector of each function in functions_array must have dimensions equal to vars_dim
                i.e. all functions in functions_array live in a space of equal dimensions.
         POST:
-             - the values or the derivatives of the functions in functions_array are not changed
              - the result of get_jacobian is a numpy 2D array and not an rAd_Var object
              - raises a ValueError exception if the number of arguments required for a function is greater than the number of input variables
         EXAMPLES
@@ -1869,7 +1870,7 @@ class rAd_Var():
         ...  return x + y
         >>> def f3(x, y):
         ...  return rAd_Var.log(x ** y)
-        >>> rAd_Var.get_jacobian([f1, f2, f3], [1, 2])
+        >>> rAd_Var.get_jacobian([f1, f2, f3], ["x", "y"], [1, 2])
         array([[2., 1.],
                [1., 1.],
                [2., 0.]])
@@ -1880,24 +1881,62 @@ class rAd_Var():
         vars_dim = len(var_values)
 
         jacobian = np.zeros((functions_dim, vars_dim))
+        list_partial_ders = []
+
+        # Raise error if the number of input variables does not match the value numbers
+        if len(var_list) != len(var_values):
+            raise ValueError(f"Number of input variables does not match the number of input values.")
+
+
+        # Create dictionary of variables to their input values
+        variable_value_dict = {}
+        for var, value in zip(var_list, var_values):
+            variable_value_dict[var] = value
+
+        # For the list of functions, create rAd_Var instances for variables used in the function
         for i, function in enumerate(functions_array):
-            variables = []
-            for value in var_values:
-                variables.append(rAd_Var(value))
-            if len(function.__code__.co_varnames) > len(variables):
-                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
-            jacobian[i] = function(*variables).get_ders()
+            func_variable = {}
+            func_variable_list = list(function.__code__.co_varnames)
+
+            for var in func_variable_list:
+                if var not in variable_value_dict:
+                    raise ValueError("The variable required as input for your function is not defined in the constructor.")
+                func_variable[var] = rAd_Var(variable_value_dict[var])
+
+            partial_der = function(**func_variable).get_ders()
+
+            dict_partial_der = {}
+            for variable, der in zip(func_variable_list, partial_der):
+                dict_partial_der[variable] = der
+
+            list_partial_ders.append(dict_partial_der)
+
+        #Get a full list of all variables from the dictionary
+        #Map the variable names to column number in the Jacobian
+        col_dict = {}
+        for index, var in enumerate(var_list):
+            col_dict[index] = var
+
+        #For each row in the jacobian matrix, assign values based on variable names; if it does not exist, assign 0
+        for i in range(jacobian.shape[0]):
+            partial_der = list_partial_ders[i]
+
+            for j in range(jacobian.shape[1]):
+                var_name = col_dict[j]
+                jacobian[i][j] = 0 if var_name not in partial_der else partial_der[var_name]
 
         return jacobian
 
     @staticmethod
-    def get_values(functions_array, var_values):
+    def get_values(functions_array, var_list, var_values):
         """
         Returns the values of for a vector-valued function evaluated at a point in higher dimensions.
         INPUTS
         =======
         functions_array: numpy array of Python function
             a vector of functions passed into the method
+        var_list: numpy array of strings
+            variable names for variables in the functions array
         var_values: numpy array of numeric values
            values for variables in the functions array
         RETURNS
@@ -1918,17 +1957,32 @@ class rAd_Var():
         ...  return x + y
         >>> def f3(x, y):
         ...  return rAd_Var.log(x ** y)
-        >>> rAd_Var.get_values([f1, f2, f3], [1, 2])
+        >>> rAd_Var.get_values([f1, f2, f3], ["x", "y"], [1, 2])
         array([2., 3., 0.])
         """
         values = []
-        for function in functions_array:
-            variables = []
-            for value in var_values:
-                variables.append(rAd_Var(value))
-            if len(function.__code__.co_varnames) > len(variables):
-                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({len(var_values)}).")
-            values.append(function(*variables).get_val())
+
+        # Raise error if the number of input variables does not match the value numbers
+        if len(var_list) != len(var_values):
+            raise ValueError(f"Number of input variables does not match the number of input values.")
+
+        # Create dictionary of variables to their input values
+        variable_value_dict = {}
+        for var, value in zip(var_list, var_values):
+            variable_value_dict[var] = value
+
+        # For the list of functions, create rAd_Var instances for variables used in the function
+        for i, function in enumerate(functions_array):
+            func_variable = {}
+            func_variable_list = list(function.__code__.co_varnames)
+
+            for var in func_variable_list:
+                if var not in variable_value_dict:
+                    raise ValueError("The variable required for your function is not defined in the constructor.")
+                func_variable[var] = rAd_Var(variable_value_dict[var])
+
+            values.append(function(**func_variable).get_val())
+
         return np.array(values)
 
     def get_ancestors(self):
@@ -1983,8 +2037,3 @@ class rAd_Var():
             new_deriv = sum(weight * var.get_gradient() for var, weight in self.children)
             self.set_ders(new_deriv)
         return self._ders
-
-
-if __name__=='__main__':
-    import doctest
-    doctest.testmod(verbose=False)
