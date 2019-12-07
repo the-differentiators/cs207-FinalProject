@@ -109,6 +109,10 @@ class Ad_Var():
         """
         return self._ders
 
+    def _typecheck_other(self, other):
+        if type(other) == rAd_Var:
+            raise TypeError("Ad_Var object cannot be used with rAd_Var objects!")
+
     def __eq__(self, other):
         """
         Returns whether the two Ad_Var instances passed have the same values and derivatives.
@@ -132,6 +136,7 @@ class Ad_Var():
         >>> x == z
         False
         """
+        self._typecheck_other(other)
         if np.isscalar(self._ders):
             if np.isscalar(other._ders):
                 return self._val == other._val and self._ders == other._ders
@@ -166,6 +171,7 @@ class Ad_Var():
         >>> x != z
         True
         """
+        self._typecheck_other(other)
         if np.isscalar(self._ders):
             if np.isscalar(other._ders):
                 return self._val != other._val or self._ders != other._ders
@@ -248,6 +254,7 @@ class Ad_Var():
         >>> f.get_ders()
         3
         """
+        self._typecheck_other(other)
         try:
             return Ad_Var(self._val + other._val, self._ders + other._ders)
         except AttributeError:
@@ -275,6 +282,7 @@ class Ad_Var():
         >>> f.get_ders()
         1
         """
+        self._typecheck_other(other)
         return self.__add__(other)
 
     def __sub__(self, other):
@@ -300,6 +308,7 @@ class Ad_Var():
         >>> f.get_ders()
         1
         """
+        self._typecheck_other(other)
         try:
             return Ad_Var(self._val - other._val, self._ders - other._ders)
         except AttributeError:
@@ -328,6 +337,7 @@ class Ad_Var():
         >>> f.get_ders()
         -1
         """
+        self._typecheck_other(other)
         try:
             return Ad_Var(other._val - self._val, other._ders - self._ders)
         except AttributeError:
@@ -357,6 +367,7 @@ class Ad_Var():
         >>> f.get_ders()
         5
         """
+        self._typecheck_other(other)
         try:
             return Ad_Var(self._val * other._val, self._ders * other._val + self._val * other._ders)
         except AttributeError:
@@ -385,6 +396,7 @@ class Ad_Var():
         >>> f.get_ders()
         2
         """
+        self._typecheck_other(other)
         return self.__mul__(other)
 
     def __truediv__(self, other):
@@ -410,6 +422,7 @@ class Ad_Var():
         >>> f.get_ders()
         0.75
         """
+        self._typecheck_other(other)
         try: # Ad_Var(3)/Ad_Var(4)
             return Ad_Var(self._val / other._val, ((self._ders * other._val) - (self._val * other._ders)) / (other._val ** 2))
         except AttributeError: # Ad_Var(3)/4
@@ -439,10 +452,8 @@ class Ad_Var():
         >>> f.get_ders()
         -0.25
         """
-        # 3/Ad_Var(4)
+        self._typecheck_other(other)
         return Ad_Var(other / self._val, - self._ders*other / (self._val) ** 2)
-        '''except AttributeError:
-            return Ad_Var(other / self._val , - other / (self._ders)**2)'''
 
     def __pow__(self, other):
         """
@@ -467,6 +478,7 @@ class Ad_Var():
         >>> f.get_ders()
         4.0
         """
+        self._typecheck_other(other)
         try:
             return Ad_Var(self._val ** other._val, self._val ** other._val * (other._ders * np.log(self._val) + other._val * self._ders/self._val))
         except AttributeError:
@@ -495,6 +507,7 @@ class Ad_Var():
         >>> f.get_ders()
         2.772588722239781
         """
+        self._typecheck_other(other)
         if isinstance(other, numbers.Number):
             return Ad_Var(other ** self._val, np.log(other) * (other ** self._val) * self._ders)
         else:
@@ -1154,6 +1167,10 @@ class rAd_Var():
         """
         return self._val
 
+    def _typecheck_other(self, other):
+        if type(other) == Ad_Var:
+            raise TypeError("rAd_Var object cannot be used with Ad_Var objects!")
+
     def __add__(self, other):
         """
         Returns the addition for one rAd_Var instance and another rAd_Var or numeric type instance passed.
@@ -1174,6 +1191,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([1., 1.])
         """
+        self._typecheck_other(other)
         try:
             rad_object = rAd_Var(self._val + other._val)
             self.children.append((rad_object, 1))
@@ -1206,6 +1224,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([1., 1.])
         """
+        self._typecheck_other(other)
         return self + other
 
     def __sub__(self, other):
@@ -1228,6 +1247,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([ 1., -1.])
         """
+        self._typecheck_other(other)
         try:
             rad_object = rAd_Var(self._val - other._val)
             self.children.append((rad_object, 1))
@@ -1259,6 +1279,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([-1.])
         """
+        self._typecheck_other(other)
         return - self + other
 
     def __mul__(self, other):
@@ -1281,6 +1302,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([2., 1.])
         """
+        self._typecheck_other(other)
         try:
             rad_object = rAd_Var(self._val * other._val)
             self.children.append((rad_object, other._val))
@@ -1313,6 +1335,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([2., 1.])
         """
+        self._typecheck_other(other)
         return self * other
 
     def __truediv__(self, other):
@@ -1335,6 +1358,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([ 0.5 , -0.25])
         """
+        self._typecheck_other(other)
         try:
             rad_object = rAd_Var(self._val / other._val)
             self.children.append((rad_object, 1 / other._val))
@@ -1366,6 +1390,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([-2.])
         """
+        self._typecheck_other(other)
         rad_object = rAd_Var(other / self._val)
         self.children.append((rad_object, - other / (self._val**2)))
         rad_object.parents = [self]
@@ -1391,6 +1416,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([2., 0.])
         """
+        self._typecheck_other(other)
         try:
             rad_object = rAd_Var(self._val ** other._val)
             self.children.append((rad_object, other._val * self._val ** (other._val - 1)))
@@ -1423,6 +1449,7 @@ class rAd_Var():
         >>> f.get_ders()
         array([2.77258872])
         """
+        self._typecheck_other(other)
         if isinstance(other, numbers.Number):
             rad_object = rAd_Var(other ** self._val)
             self.children.append((rad_object, other ** self._val * np.log(other)))
@@ -1451,6 +1478,7 @@ class rAd_Var():
         >>> x == z
         False
         """
+        self._typecheck_other(other)
         if self._val == other._val and self.get_gradient() == other.get_gradient():
             return True
         else:
@@ -1476,6 +1504,7 @@ class rAd_Var():
         >>> x != z
         True
         """
+        self._typecheck_other(other)
         return not self == other
 
     def __neg__(self):
@@ -1954,7 +1983,6 @@ class rAd_Var():
             new_deriv = sum(weight * var.get_gradient() for var, weight in self.children)
             self.set_ders(new_deriv)
         return self._ders
-
 
 
 if __name__=='__main__':

@@ -11,7 +11,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from src.AutoDiff import Ad_Var
+from src.AutoDiff import Ad_Var, rAd_Var
 
 def test_comparison():
     ## scaler
@@ -170,7 +170,7 @@ def test_pow():
     ## scalar (rpow)
     c = Ad_Var(2)
     try:
-        d_exception = 'not a number' ** c
+        _ = 'not a number' ** c
     except TypeError:
         print("TypeError successfully caught - rpow")
     d = 2 ** c
@@ -275,21 +275,27 @@ def test_eq():
 
 def test_input():
     try:
-        a = Ad_Var('s',2)
+        _ = Ad_Var('s',2)
     except TypeError:
         print("TypeError sucessfully catched - value1")
     try:
-        b = Ad_Var([2,3,4],2)
+        _ = Ad_Var([2,3,4],2)
     except TypeError:
         print("TypeError sucessfully catched - value2")
     try:
-        c = Ad_Var(2,'s')
+        _ = Ad_Var(2,'s')
     except TypeError:
         print("TypeError sucessfully catched - der1")
     try:
-        d = Ad_Var(2,np.array([1,2,'dog']))
+        _ = Ad_Var(2,np.array([1,2,'dog']))
     except TypeError:
         print("TypeError sucessfully catched - der2")
+    try:
+        a = Ad_Var(20)
+        b = rAd_Var(5)
+        _ = a + b
+    except TypeError:
+        print("TypeError successfully catched - _typecheck_other")
 
 def test_func():
     x = Ad_Var(1, np.array([1, 0, 0]))

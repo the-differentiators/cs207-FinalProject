@@ -4,7 +4,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from src.AutoDiff import rAd_Var
+from src.AutoDiff import rAd_Var, Ad_Var
 
 def test_exp():
     # Scalar
@@ -104,6 +104,7 @@ def test_div():
     x1 = x / y
     ders = x1.get_ders()
     assert(x1.get_val() == 2)
+    assert(ders == [1/5, -2/5]).all()
 
 def test_log():
     # Scalar
@@ -128,7 +129,7 @@ def test_pow():
     assert(ders == [12])
     # Type test.
     try:
-        f2 = a ** "NaN"
+        _ = a ** "NaN"
     except:
         print("test_pow type checking successful!")
     # Rpow.
@@ -140,7 +141,7 @@ def test_pow():
     assert(ders_g == [81*np.log(3)])
     # Rpow bad input test.
     try:
-        bad = 'NaN' ** c
+        _ = 'NaN' ** c
     except:
         print("Rpow non-numeric base test passed!")
     # Gradient
@@ -203,11 +204,11 @@ def test_trig():
 def test_inverse_trig():
     # Improper input test
     try:
-        bad_arcsin = rAd_Var(-2).arcsin()
+        _ = rAd_Var(-2).arcsin()
     except ValueError:
         print("Arcsin domain test passed!")
     try:
-        bad_arccos = rAd_Var(-2).arccos()
+        _ = rAd_Var(-2).arccos()
     except ValueError:
         print("Arcos domain test passed!")
     # Scalar
@@ -296,6 +297,10 @@ def test_input():
         print(rAd_Var(None))
     except TypeError:
         print("Input test 2 passed.")
+    try:
+        _ = rAd_Var(5) + Ad_Var(5)
+    except TypeError:
+        print("rAd_Var and Ad_Var incompatibility check passed.")
     a = rAd_Var(np.array([42]))
     a.set_val(5)
     assert(a.get_val() == 5)
