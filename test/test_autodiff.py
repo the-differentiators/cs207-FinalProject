@@ -395,6 +395,9 @@ def test_grid_eval():
     except NameError:
         print("NameError successfully catched - function string contains a which is not in the variables passed.")
 
+def test_set_ders():
+    x1 = Ad_Var(1)
+    x1.set_ders(2)
 
 test_comparison()
 test_neg()
@@ -417,4 +420,5 @@ test_eq()
 test_func()
 test_input()
 test_grid_eval()
+test_set_ders()
 print("All tests passed!")

@@ -1900,11 +1900,8 @@ class rAd_Var():
 
             for var in func_variable_list:
                 if var not in variable_value_dict:
-                    raise ValueError("The variable in your function is not defined in the constructor.")
+                    raise ValueError("The variable required as input for your function is not defined in the constructor.")
                 func_variable[var] = rAd_Var(variable_value_dict[var])
-
-            if len(function.__code__.co_varnames) > len(func_variable):
-                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
 
             partial_der = function(**func_variable).get_ders()
 
@@ -1969,7 +1966,6 @@ class rAd_Var():
         if len(var_list) != len(var_values):
             raise ValueError(f"Number of input variables does not match the number of input values.")
 
-
         # Create dictionary of variables to their input values
         variable_value_dict = {}
         for var, value in zip(var_list, var_values):
@@ -1982,11 +1978,8 @@ class rAd_Var():
 
             for var in func_variable_list:
                 if var not in variable_value_dict:
-                    raise ValueError("The variable in your function is not defined in the constructor.")
+                    raise ValueError("The variable required for your function is not defined in the constructor.")
                 func_variable[var] = rAd_Var(variable_value_dict[var])
-
-            if len(function.__code__.co_varnames) > len(func_variable):
-                raise ValueError(f"Number of arguments required for function is greater than the number of input variables ({vars_dim}).")
 
             values.append(function(**func_variable).get_val())
 
