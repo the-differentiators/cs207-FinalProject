@@ -43,7 +43,7 @@ class rAd_Var():
         Value = 3
         Derivative = 1
         """
-        print_stm = f'Value = {self._val}\nDerivative = {self.get_ders()}'
+        print_stm = f'Value = {self._val}\nDerivative = {self.runreverse()}'
         return print_stm
 
     def __repr__(self):
@@ -62,7 +62,7 @@ class rAd_Var():
         Value = 3
         Derivative = 1
         """
-        print_stm = f'Value = {self._val}\nDerivative = {self.get_ders()}'
+        print_stm = f'Value = {self._val}\nDerivative = {self.runreverse()}'
         return print_stm
 
     def set_val(self, value):
@@ -98,15 +98,43 @@ class rAd_Var():
         self._ders = derivatives
 
     def get_val(self):
+        """
+        Returns the value for the rAd_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+        Returns
+        =======
+        value for the rAd_Var instance
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> x.get_val()
+        3
+        """
         return self._val
 
     def get_ders(self):
+        """
+        Returns the derivative for the rAd_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+        Returns
+        =======
+        derivative for the rAd_Var instance
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> x.get_ders()
+        1
+        """
         if self._ders is None:
-            if not self.children:
-                self._ders = 1
-            else:
-                new_deriv = sum(weight * var.get_ders() for var, weight in self.children)
-                self.set_ders(new_deriv)
+            # if self.children == []:
+            #     self.set_ders(1)
+            # else:
+            new_deriv = sum(weight * var.get_ders() for var, weight in self.children)
+            self.set_ders(new_deriv)
         return self._ders
 
     def __add__(self, other):
@@ -202,17 +230,70 @@ class rAd_Var():
             raise TypeError("Base should be an instance of numeric type.")
 
     def __eq__(self, other):
+        """
+        Returns whether the two rAd_Var instances passed have the same values and derivatives.
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var
+        Returns
+        =======
+        equality check for two rAd_Var instances
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> y = rAd_Var(3) * rAd_Var(1)
+        >>> z = rAd_Var(4)
+        >>> x == y
+        True
+        >>> x == z
+        False
+        """
         if self._val == other._val and self.get_ders() == other.get_ders():
             return True
         else:
             return False
 
     def __ne__(self, other):
+        """
+        Returns whether the two Ad_Var instances passed do not have the same values and derivatives.
+        Parameters
+        ==========
+        self: Ad_Var
+        other: Ad_Var
+        Returns
+        =======
+        inequality check for two Ad_Var instances
+        Examples
+        =========
+        >>> x = rAd_Var(3)
+        >>> y = rAd_Var(3) * rAd_Var(1)
+        >>> z = rAd_Var(4)
+        >>> x != y
+        False
+        >>> x != z
+        True
+        """
         return not self == other
 
     def __neg__(self):
+        """
+        Returns the negation for the Ad_Var instance passed.
+        Parameters
+        ==========
+        self: Ad_Var
+        Returns
+        =======
+        negation for the Ad_Var instance
+        Examples
+        =========
+        >>> x = - rAd_Var(3)
+        >>> x
+        Value = -3
+        Derivative = [-1]
+        """
         rad_object = rAd_Var(self._val * -1)
-        self.children.append((rad_object, (np.array([-1.0]*len(self._val)))))
+        self.children.append((rad_object, -1.0))
         rad_object.parents = [self]
         return rad_object
 
