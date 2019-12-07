@@ -4,7 +4,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from src.ReverseAD import rAd_Var
+from src.AutoDiff import rAd_Var
 
 def test_exp():
     # Scalar
