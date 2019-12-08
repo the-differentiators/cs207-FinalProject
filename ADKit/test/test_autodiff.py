@@ -11,7 +11,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from AutoDiff import Ad_Var, rAd_Var
+from ADKit.AutoDiff import Ad_Var, rAd_Var
 
 def test_comparison():
     ## scaler

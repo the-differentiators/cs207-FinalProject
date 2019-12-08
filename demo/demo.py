@@ -2,7 +2,7 @@ import sys
 sys.path.append('../')
 
 import numpy as np
-from AutoDiff.AutoDiff import Ad_Var
+from ADKit.AutoDiff import Ad_Var
 
 x = Ad_Var()
 f_str = "x**2 + 2*x"
