@@ -5,6 +5,6 @@ before_install:
     - pip install pytest pytest-cov
     - pip install codecov
 script:
-    - pytest --cov=py-autodiff
+    - pytest --cov=ADKit
 after_success:
     - codecov

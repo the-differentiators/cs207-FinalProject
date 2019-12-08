@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-  name = 'py-autodiff',
-  packages = ['py-autodiff'],
+  name = 'ADKit',
+  packages = ['ADKit'],
   version = '0.1',
   license='MIT',
   description = 'A lightweight Python library supporting forward and reverse mode automatic differentiation variables and computation.',
