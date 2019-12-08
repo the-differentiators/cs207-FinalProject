@@ -1027,12 +1027,8 @@ class rAd_Var():
         elif isinstance(val, numbers.Number):
             self._val = val
 
-        elif isinstance(val, rAd_Var):
-            self._val = val.get_val()
-
         else:
-            print(val)
-            # raise TypeError(f"{} is invalid rAd_Var input!")
+            raise TypeError(f"{} is invalid rAd_Var input!")
 
         self._ders = None
         self.parents = []
