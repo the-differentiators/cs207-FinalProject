@@ -11,7 +11,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from src.AutoDiff import Ad_Var, rAd_Var
+from AutoDiff import Ad_Var, rAd_Var
 
 def test_comparison():
     ## scaler
@@ -193,8 +193,6 @@ def test_pow():
         print("TypeError sucessfully catched - pow")
     ## gradient (rpow)
     f2 = 2 ** x1 + 2 ** x2
-    print(f2)
-    print([2 * np.log(2), 4 * np.log(2)])
     assert f2.get_val() == 6.0
     assert (f.get_ders() == [2., -3/16]).all()
 
