@@ -1028,7 +1028,7 @@ class rAd_Var():
             self._val = val
 
         else:
-            raise TypeError()
+            raise TypeError(f"{val} is invalid rAd_Var input!")
 
         self._ders = None
         self.parents = []

@@ -8,7 +8,7 @@ setup(
   author = 'The Differentiators (Michael Scott, Dimitris Vamvourellis, Yiwen Wang, Royce Yap)',
   author_email = 'mscott935.ms@gmail.com',
   url = 'https://github.com/the-differentiators/cs207-FinalProject',
-  download_url = '', # TODO: Wait for documentation to be finished, then do this
+  download_url = 'https://github.com/the-differentiators/cs207-FinalProject/archive/0.1.tar.gz',
   keywords = ['Automatic Differentiation', 'Differentiation', 'Derivatives', 'Math', 'Forward Mode', 'Reverse Mode'],
   install_requires=[
           'numpy',
