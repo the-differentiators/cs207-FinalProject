@@ -11,7 +11,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
-from src.AutoDiff import Ad_Var
+from ADKit.AutoDiff import Ad_Var, rAd_Var
 
 def test_setters():
     a = Ad_Var(1,-3)
@@ -189,7 +189,7 @@ def test_pow():
     ## scalar (rpow)
     c = Ad_Var(2)
     try:
-        d_exception = 'not a number' ** c
+        _ = 'not a number' ** c
     except TypeError:
         print("TypeError successfully caught - rpow")
     d = 2 ** c
@@ -212,8 +212,6 @@ def test_pow():
         print("TypeError sucessfully catched - pow")
     ## gradient (rpow)
     f2 = 2 ** x1 + 2 ** x2
-    print(f2)
-    print([2 * np.log(2), 4 * np.log(2)])
     assert f2.get_val() == 6.0
     assert (f.get_ders() == [2., -3/16]).all()
 
@@ -292,23 +290,48 @@ def test_eq():
     print(x)
     assert (x == y).all()
 
+def test_eq_input():
+    x = Ad_Var(1, np.array([1, 0, 0]))
+    y = Ad_Var(2, 1)
+
+    try:
+        x == y
+    except TypeError:
+        print("TypeERror successfully caught - Equality operator test 1")
+
+    try:
+        x != y
+    except TypeError:
+        print("TypeERror successfully caught - Equality operator test 2")
+
+    try:
+        y != x
+    except TypeError:
+        print("TypeERror successfully caught - Equality operator test 3")
+
 def test_input():
     try:
-        a = Ad_Var('s',2)
+        f = Ad_Var('s',2)
     except TypeError:
         print("TypeError sucessfully catched - value1")
     try:
-        b = Ad_Var([2,3,4],2)
+        f = Ad_Var([2,3,4],2)
     except TypeError:
         print("TypeError sucessfully catched - value2")
     try:
-        c = Ad_Var(2,'s')
+        f = Ad_Var(2,'s')
     except TypeError:
         print("TypeError sucessfully catched - der1")
     try:
-        d = Ad_Var(2,np.array([1,2,'dog']))
+        f = Ad_Var(2,np.array([1,2,'dog']))
     except TypeError:
         print("TypeError sucessfully catched - der2")
+    try:
+        a = Ad_Var(20)
+        b = rAd_Var(5)
+        f = a + b
+    except TypeError:
+        print("TypeError successfully catched - _typecheck_other")
 
 def test_func():
     x = Ad_Var(1, np.array([1, 0, 0]))
@@ -408,7 +431,10 @@ def test_grid_eval():
     except NameError:
         print("NameError successfully catched - function string contains a which is not in the variables passed.")
 
-test_setters()
+def test_set_ders():
+    x1 = Ad_Var(1)
+    x1.set_ders(2)
+
 test_comparison()
 test_neg()
 test_exp()
@@ -427,7 +453,9 @@ test_mul1()
 test_mul2()
 test_multiple()
 test_eq()
+test_eq_input()
 test_func()
 test_input()
 test_grid_eval()
+test_set_ders()
 print("All tests passed!")
