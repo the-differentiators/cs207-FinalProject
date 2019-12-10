@@ -1,14 +1,22 @@
 from distutils.core import setup
+from os import path
+curr_dir = path.abspath(path.dirname(__file__))
+with open(path.join(curr_dir, 'README.md'), encoding='utf-8') as f:
+  long_desc = f.read()
+
+  
 setup(
   name = 'ADKit',
   packages = ['ADKit'],
-  version = '0.1',
+  version = '0.11',
   license='MIT',
   description = 'A lightweight Python library supporting forward and reverse mode automatic differentiation variables and computation.',
+  long_description = long_desc,
+  long_description_content_type = 'text/markdown',
   author = 'The Differentiators (Michael Scott, Dimitris Vamvourellis, Yiwen Wang, Royce Yap)',
   author_email = 'mscott935.ms@gmail.com',
   url = 'https://github.com/the-differentiators/cs207-FinalProject',
-  download_url = 'https://github.com/the-differentiators/cs207-FinalProject/archive/0.1.tar.gz',
+  download_url = 'https://github.com/the-differentiators/cs207-FinalProject/archive/0.11.tar.gz',
   keywords = ['Automatic Differentiation', 'Differentiation', 'Derivatives', 'Math', 'Forward Mode', 'Reverse Mode'],
   install_requires=[
           'numpy',
